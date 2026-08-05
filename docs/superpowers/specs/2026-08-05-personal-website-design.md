@@ -451,14 +451,38 @@ newsletter.
 directory is not a git repository. Cloudflare Pages builds from a connected repo, so
 both are blocking before any code is written.
 
-## 11. Open questions
+## 11. Migration from the current site
+
+The existing site at `freddienortham.com` is a single-page SPA with a catch-all route:
+`/blog`, `/about`, `/projects`, `/writing` and `/work` all return 200 serving the same
+index page. There is no real content at any deep URL and exactly one outbound link
+(XALT, `https://wearexalt.com/`).
+
+Consequences, all favourable:
+
+- **No redirect burden.** Nothing published lives at a URL that must be preserved. The
+  `aliases` mechanism in §4.2 exists for future renames, not for this cutover.
+- **Already served by Cloudflare.** Pointing the domain at Pages is a custom-domain
+  configuration, not a nameserver migration.
+- Paths that currently return 200 with placeholder content will become either real pages
+  (`/blog/`, `/projects/`) or a proper 404. Both are an improvement on a soft 200.
+
+Cutover is therefore: build, deploy to a Pages preview URL, verify, then attach the
+custom domain.
+
+## 12. Open questions
 
 These block content, not construction. The site can be built and reviewed with
 placeholder copy while they are resolved.
 
-1. Bio: role, company, what is currently being built. One paragraph.
+1. Bio. Partially answered by the current site: Head of Product and Innovation at XALT,
+   2024 to present, leading product vision and platform strategy across brand-fan
+   engagement, data intelligence, and community growth. **The facts are captured; the
+   copy needs rewriting.** The existing wording ("shaping digital ecosystems at the
+   intersection of media, AI, and data") is the register this site should avoid.
 2. The five projects (Record, Halero, XALT, Kanzoro, Spaniel): one line each covering
-   what it is, the owner's role, whether it is live, and a public link if any.
+   what it is, the owner's role, whether it is live, and a public link if any. Only XALT
+   is known so far (`https://wearexalt.com/`).
 3. Birth date, for the days-on-earth counter.
 4. "J-space": what this refers to. Not guessing at an intellectual reference.
 5. Which social links belong in the footer.
