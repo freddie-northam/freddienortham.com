@@ -188,7 +188,7 @@ declared in `<head>` via `<link rel="alternate" type="application/rss+xml">`.
 Every page emits, from `Page` and `Section` with no per-page authoring:
 
 - `<title>` and `<meta name="description">` from Title and Standfirst
-- `<link rel="canonical">` at the absolute trailing-slash URL
+- `<link rel="canonical">` at the absolute trailing-slash URL on `https://freddienortham.com`
 - OpenGraph and Twitter card tags: title, description, url, type, site name
 - The section's favicon (§6.3)
 
@@ -460,9 +460,8 @@ placeholder copy while they are resolved.
 2. The five projects (Record, Halero, XALT, Kanzoro, Spaniel): one line each covering
    what it is, the owner's role, whether it is live, and a public link if any.
 3. Birth date, for the days-on-earth counter.
-4. Domain.
-5. "J-space": what this refers to. Not guessing at an intellectual reference.
-6. Which social links belong in the footer.
-7. Should the Blog section be renamed? It will hold a funeral poem and a birthday speech
+4. "J-space": what this refers to. Not guessing at an intellectual reference.
+5. Which social links belong in the footer.
+6. Should the Blog section be renamed? It will hold a funeral poem and a birthday speech
    alongside essays, and "Blog" sits oddly with those. Raised once, declined once,
    recorded here because the content makes it worth a second look.
