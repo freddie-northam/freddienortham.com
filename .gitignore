@@ -1,0 +1,9 @@
+# Build output
+/dist/
+/bin/
+
+# Tooling state
+.gstack/
+
+# OS
+.DS_Store
