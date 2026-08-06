@@ -1,7 +1,6 @@
 package ui
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/freddie-northam/freddienortham.com/internal/content"
@@ -14,49 +13,45 @@ type Link struct {
 	Active bool
 }
 
-// RowData is one item in any list. Every section builds these, so Blog,
-// Projects, Work and Skills cannot drift into four different row treatments.
-type RowData struct {
-	Title string
-	Sub   string
-	URL   string
-	Date  string // leading mono column
-	Meta  string // trailing mono column
-	Thumb string
-	Mark  bool // draw the site mark where there is no thumbnail
-}
-
 // View is everything a template needs. Building it in Go keeps the templ
 // files small and free of logic.
 type View struct {
 	Site        content.Config
 	Title       string // <title>, without the site name
-	Description string // meta description; may be a generated fallback
+	Description string // meta description only; may be a generated fallback
 	Lede        string // visible standfirst; only ever authored content
 	Path        string // canonical, trailing slash
 	Accent      string
 	Favicon     string
 	Nav         []Link
-	Tabs        []Link
+	Tabs        []Link // sub-sections, rendered as the tab bar
 	Section     content.Section
 	Page        content.Page
-	Rows        []RowData
-	Recent      []RowData
-	Projects    []RowData
-	Books       []content.Book
+	Pages       []content.Page
+	Recent      []content.Page
+	Projects    []content.Page
 	Skills      []Skill
+	Components  []Component
 	Work        []Role
 	ShowAllWork bool
-	DaysZero    int64
+	DaysZero    int64 // unix seconds of the birth date, for the counter
 }
 
-// Skill is one authored Agent Skill, read from SKILL.md frontmatter so the
-// page cannot drift from the source.
+// Skill is one authored Agent Skill, read from SKILL.md frontmatter so this
+// page can never drift from the source.
 type Skill struct {
 	Name        string
 	Description string
 	Install     string
 	URL         string
+}
+
+// Component is one entry in the live component gallery: the rendered thing
+// beside the source that produced it.
+type Component struct {
+	Name    string
+	Note    string
+	Snippet string
 }
 
 // Role is a work history entry.
@@ -75,14 +70,15 @@ func (v View) CanonicalURL() string {
 
 func (v View) FullTitle() string {
 	if v.Title == "" {
-		return v.Site.Name + " — " + v.Site.Role
+		return v.Site.Name
 	}
 	return v.Title + " — " + v.Site.Name
 }
 
 // NavFor builds the top-level nav, marking the section the reader is in.
 func NavFor(active string) []Link {
-	out := []Link{{Title: "Home", URL: "/", Active: active == ""}}
+	var out []Link
+	out = append(out, Link{Title: "Home", URL: "/", Active: active == ""})
 	for _, s := range content.Nav() {
 		out = append(out, Link{Title: s.Title, URL: s.Path(), Active: s.Slug == active})
 	}
@@ -102,31 +98,3 @@ func TabsFor(parent, active string) []Link {
 	}
 	return out
 }
-
-// RowsFrom converts pages into rows. Dated pages lead with the date; undated
-// ones lead with the site mark, so a list never has a ragged empty column.
-func RowsFrom(pages []content.Page) []RowData {
-	out := make([]RowData, 0, len(pages))
-	for _, p := range pages {
-		r := RowData{Title: p.Title, Sub: p.Standfirst, URL: p.URL(), Thumb: p.Thumb}
-		if p.Date != nil {
-			r.Date = p.Date.Format("01/06")
-		} else {
-			r.Mark = true
-			r.Meta = p.Meta
-		}
-		out = append(out, r)
-	}
-	return out
-}
-
-func FirstN(r []RowData, n int) []RowData {
-	if len(r) < n {
-		return r
-	}
-	return r[:n]
-}
-
-func colClass(span int) string { return fmt.Sprintf("col-%d", span) }
-
-func countStr(n int) string { return fmt.Sprint(n) }

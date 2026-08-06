@@ -143,11 +143,8 @@ func (s *Site) home() error {
 		}
 		v.Page = p
 	}
-	v.Recent = ui.FirstN(ui.RowsFrom(s.Pages["blog"]), 4)
-	v.Projects = ui.FirstN(ui.RowsFrom(s.Pages["projects"]), 3)
-	if r, ok := s.Index["reading"]; ok {
-		v.Books = r.Books
-	}
+	v.Recent = firstN(s.Pages["blog"], 3)
+	v.Projects = firstN(s.Pages["projects"], 3)
 	return s.write("/", ui.Home(v))
 }
 
@@ -159,7 +156,7 @@ func (s *Site) section(sec content.Section) error {
 	v := s.base(sec, activeTop)
 	v.Path = sec.Path()
 	v.Title = sec.Title
-	v.Rows = ui.RowsFrom(s.Pages[sec.Slug])
+	v.Pages = s.Pages[sec.Slug]
 	v.Skills = s.Skills
 
 	idx, hasIdx := s.Index[sec.Slug]
@@ -178,11 +175,11 @@ func (s *Site) section(sec content.Section) error {
 				return err
 			}
 		case "shelf":
-			v.Books = idx.Books
 			if err := s.write(sec.Path(), ui.Shelf(v)); err != nil {
 				return err
 			}
 		case "components":
+			v.Components = make([]ui.Component, 7)
 			if err := s.write(sec.Path(), ui.Components(v)); err != nil {
 				return err
 			}
@@ -217,7 +214,7 @@ func (s *Site) section(sec content.Section) error {
 	}
 
 	// Individual pages within an index section.
-	for _, p := range s.Pages[sec.Slug] {
+	for _, p := range v.Pages {
 		pv := s.base(sec, activeTop)
 		pv.Tabs = nil
 		pv.Path = p.URL()
@@ -311,6 +308,13 @@ func roles(in []content.Role) []ui.Role {
 		out = append(out, ui.Role(r))
 	}
 	return out
+}
+
+func firstN(p []content.Page, n int) []content.Page {
+	if len(p) < n {
+		return p
+	}
+	return p[:n]
 }
 
 func normalise(p string) string {

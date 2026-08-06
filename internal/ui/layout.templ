@@ -33,7 +33,15 @@ templ Layout(v View) {
 		<body style={ fmt.Sprintf("--accent:%s", v.Accent) }>
 			<a class="skip" href="#main">Skip to content</a>
 			<div class="shell">
-				@masthead(v)
+				<nav class="nav" aria-label="Primary">
+					for _, l := range v.Nav {
+						if l.Active {
+							<a href={ templ.SafeURL(l.URL) } class="on" aria-current="page">{ l.Title }</a>
+						} else {
+							<a href={ templ.SafeURL(l.URL) }>{ l.Title }</a>
+						}
+					}
+				</nav>
 				<main id="main">
 					{ children... }
 				</main>
@@ -41,36 +49,6 @@ templ Layout(v View) {
 			</div>
 		</body>
 	</html>
-}
-
-templ masthead(v View) {
-	<header class="masthead">
-		<a class="brand" href="/">
-			<span class="brand-mark" aria-hidden="true">FN</span>
-			{ v.Site.Name }
-			<span class="brand-sub">— product, XALT</span>
-		</a>
-		<nav class="nav" aria-label="Primary">
-			for _, l := range v.Nav {
-				if l.Active {
-					<a href={ templ.SafeURL(l.URL) } class="on" aria-current="page">{ l.Title }</a>
-				} else {
-					<a href={ templ.SafeURL(l.URL) }>{ l.Title }</a>
-				}
-			}
-		</nav>
-		if v.Site.Email != "TODO" {
-			<a class="pill" href={ templ.SafeURL("mailto:" + v.Site.Email) }>
-				Get in touch
-				@ArrowUpRight()
-			</a>
-		} else {
-			<a class="pill" href={ templ.SafeURL(v.Site.LinkedIn) } rel="me noopener">
-				Get in touch
-				@ArrowUpRight()
-			</a>
-		}
-	</header>
 }
 
 // tabs renders sub-sections. Every tab is a real URL, so this works with
@@ -89,26 +67,8 @@ templ tabs(v View) {
 	}
 }
 
-// PageHead is the standard page opener: title and lede left, optional count
-// right, on a hairline rule. One opener for every page is most of what makes
-// a set of pages feel like one site.
-templ PageHead(title, lede string, count int) {
-	<div class="page-head">
-		<div>
-			<h1>{ title }</h1>
-			if lede != "" {
-				<p class="lede">{ lede }</p>
-			}
-		</div>
-		if count > 0 {
-			<span class="count">{ fmt.Sprint(count) }</span>
-		}
-	</div>
-}
-
 templ footer(v View) {
 	<footer class="footer">
-		<span>© 2026 — { v.Site.Name }</span>
 		<div class="footer-links">
 			<a href={ templ.SafeURL(v.Site.GitHub) } rel="me noopener">
 				github
@@ -124,6 +84,12 @@ templ footer(v View) {
 				linkedin
 				@ArrowUpRight()
 			</a>
+			if v.Site.Email != "TODO" {
+				<a href={ templ.SafeURL("mailto:" + v.Site.Email) }>
+					email
+					@ArrowUpRight()
+				</a>
+			}
 			<a href="/feed.xml">
 				rss
 				@Rss()
@@ -131,7 +97,7 @@ templ footer(v View) {
 		</div>
 		<p class="colophon">
 			<span data-days={ fmt.Sprint(v.DaysZero) } class="days">&nbsp;</span>
-			<span>{ v.Site.Colophon }</span>
+			<span class="aphorism">{ v.Site.Colophon }</span>
 		</p>
 	</footer>
 }

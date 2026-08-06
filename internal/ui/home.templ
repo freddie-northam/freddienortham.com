@@ -1,95 +1,43 @@
 package ui
 
+import "github.com/freddie-northam/freddienortham.com/internal/content"
+
 templ Home(v View) {
 	@Layout(v) {
-		<section class="hero">
-			<h1>{ v.Site.Headline }</h1>
-			<div class="hero-meta">
-				<span class="badge"><span class="badge-dot"></span>{ v.Site.Status }</span>
-				<a class="pill pill-ghost" href="/projects/">
-					See the work
-					@ArrowRight()
-				</a>
-			</div>
-		</section>
-		<div class="grid">
-			@cardList("Writing", "/blog/", "Essays, and one research project from 2021.", v.Recent, 8)
-			@cardIntro(v)
-			@cardList("Projects", "/projects/", "Things built outside the day job.", v.Projects, 6)
-			@cardShelf(v)
+		<h1 class="wordmark" data-wave>
+			for _, word := range Words(v.Site.Name) {
+				<span class="word">
+					for _, ch := range word {
+						<span class="ltr">{ ch }</span>
+					}
+				</span>
+			}
+		</h1>
+		<div class="intro prose">
+			@templ.Raw(string(v.Page.Body))
 		</div>
+		if len(v.Recent) > 0 {
+			@homeBlock("Writing", "/blog/", v.Recent)
+		}
+		if len(v.Projects) > 0 {
+			@homeBlock("Projects", "/projects/", v.Projects)
+		}
 	}
 }
 
-// cardIntro carries the paragraph that used to be the whole homepage. It sits
-// in the grid as one card among the widgets rather than above them.
-templ cardIntro(v View) {
-	<section class="card col-4">
-		<div class="card-head">
-			<span class="card-title">About<span class="dim">/short</span></span>
-		</div>
-		<div class="card-body prose">
-			@templ.Raw(string(v.Page.Body))
-		</div>
-		<div class="card-foot">
-			<a class="pill pill-ghost" href="/not-code/">
-				Not code
+templ homeBlock(title, href string, pages []content.Page) {
+	<section class="home-block">
+		<div class="meta-rule">
+			<span>{ title }</span>
+			<a class="more" href={ templ.SafeURL(href) }>
+				all
 				@ArrowRight()
 			</a>
 		</div>
-	</section>
-}
-
-templ cardList(title, href, note string, rows []RowData, span int) {
-	<section class={ "card", colClass(span) }>
-		<div class="card-head">
-			<span class="card-title">
-				{ title }
-				<span class="count">{ countStr(len(rows)) }</span>
-			</span>
-			<a class="pill pill-ghost" href={ templ.SafeURL(href) }>
-				All
-				@ArrowRight()
-			</a>
-		</div>
-		if len(rows) == 0 {
-			<p class="empty">Nothing published yet.</p>
-		} else {
-			<ul class="rows">
-				for _, r := range rows {
-					@Row(r)
-				}
-			</ul>
-		}
-		<div class="card-foot">
-			<span class="card-note">{ note }</span>
-		</div>
-	</section>
-}
-
-// cardShelf puts the bookshelf on the homepage. It is the one widget that is
-// an object rather than a list, and it does more for the page than another
-// row of links would.
-templ cardShelf(v View) {
-	<section class="card col-6">
-		<div class="card-head">
-			<span class="card-title">Reading<span class="dim">/shelf</span></span>
-			<a class="pill pill-ghost" href="/not-code/reading/">
-				Open
-				@ArrowRight()
-			</a>
-		</div>
-		if len(v.Books) == 0 {
-			<p class="empty">The shelf is empty.</p>
-		} else {
-			<div class="shelf">
-				<div class="shelf-books">
-					for _, b := range v.Books {
-						@spine(b)
-					}
-				</div>
-				<div class="shelf-board" aria-hidden="true"></div>
-			</div>
-		}
+		<ul class="list" data-grid>
+			for _, p := range pages {
+				@Row(p)
+			}
+		</ul>
 	</section>
 }

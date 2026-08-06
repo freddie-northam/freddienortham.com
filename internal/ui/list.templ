@@ -1,23 +1,48 @@
 package ui
 
-// List is the generic index: Blog, Projects, and any sub-page that lists
-// things. One template, so no two sections drift apart.
+import "github.com/freddie-northam/freddienortham.com/internal/content"
+
+// List is the generic index. It serves Blog, Projects, and every sub-page
+// that lists things. The optional leading thumbnail is the only difference
+// between a Blog row and a Projects row, which is why there is one template
+// here and not two.
 templ List(v View) {
 	@Layout(v) {
-		@PageHead(v.Section.Title, v.Lede, len(v.Rows))
+		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
-		if len(v.Rows) == 0 {
-			<div class="card">
-				<p class="empty">Nothing published here yet.</p>
+		if len(v.Pages) > 0 {
+			<div class="meta-rule">
+				<span>{ countLabel(len(v.Pages)) }</span>
+				<span>{ spanLabel(v.Pages) }</span>
 			</div>
+			<ul class="list" data-grid>
+				for _, p := range v.Pages {
+					@Row(p)
+				}
+			</ul>
 		} else {
-			<div class="card">
-				<ul class="rows">
-					for _, r := range v.Rows {
-						@Row(r)
-					}
-				</ul>
-			</div>
+			<p class="empty">Nothing here yet.</p>
 		}
 	}
+}
+
+templ Row(p content.Page) {
+	<li class="row">
+		<a href={ templ.SafeURL(p.URL()) }>
+			if p.Thumb != "" {
+				<span class="thumb"><img src={ p.Thumb } alt="" loading="lazy" decoding="async"/></span>
+			} else if hasThumbSlot(p) {
+				// Generated fallback so a project with no screenshot reads as
+				// deliberate rather than broken.
+				<span class="thumb thumb-fallback" aria-hidden="true"></span>
+			}
+			<span class="row-body">
+				<span class="row-title">{ p.Title }</span>
+				if p.Standfirst != "" {
+					<span class="row-sub">{ p.Standfirst }</span>
+				}
+			</span>
+			<span class="row-rail">{ p.Rail() }</span>
+		</a>
+	</li>
 }

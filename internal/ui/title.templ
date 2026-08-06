@@ -1,28 +1,23 @@
 package ui
 
-// Row is one item in a list: date or mark, title, subtitle, chevron. Used by
-// every section, which is what stops Blog, Projects and Not Code drifting into
-// three different list treatments.
-templ Row(r RowData) {
-	<li class="row">
-		<a href={ templ.SafeURL(r.URL) }>
-			if r.Thumb != "" {
-				<span class="row-thumb"><img src={ r.Thumb } alt="" loading="lazy" decoding="async"/></span>
-			} else if r.Mark {
-				<span class="row-thumb"><span class="row-mark" aria-hidden="true"></span></span>
-			} else if r.Date != "" {
-				<span class="row-date">{ r.Date }</span>
-			}
-			<span class="row-main">
-				<span class="row-title">{ r.Title }</span>
-				if r.Sub != "" {
-					<span class="row-sub">{ r.Sub }</span>
-				}
-			</span>
-			if r.Meta != "" {
-				<span class="row-date">{ r.Meta }</span>
-			}
-			@ArrowRight()
-		</a>
-	</li>
+// EchoTitle is the display title. The four ghost copies are layered
+// text-shadows on this single element, not duplicate DOM nodes: duplicates
+// would make find-in-page report five phantom matches and text selection
+// yield the word repeated five times. As shadows they add no nodes and are
+// invisible to assistive technology by construction.
+//
+// The cost is that per-ghost stagger is impossible, since browsers interpolate
+// a shadow stack layer by layer. The stack rises as one, which reads nearly
+// identically at this size.
+templ EchoTitle(text string) {
+	<h1 class="echo" data-echo>{ text }</h1>
+}
+
+templ PageTitle(text, standfirst string) {
+	<header class="page-head">
+		@EchoTitle(text)
+		if standfirst != "" {
+			<p class="standfirst">{ standfirst }</p>
+		}
+	</header>
 }

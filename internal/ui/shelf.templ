@@ -7,31 +7,33 @@ import "github.com/freddie-northam/freddienortham.com/internal/content"
 // Spines are typographic rather than scanned covers. On a monochrome site a
 // row of publisher artwork would be the only colour on the page and would
 // fight everything else, and it would make the section depend on chasing down
-// images. Set in Geist on a white spine it needs no assets at all, and a
-// cover can still be supplied per book when one earns it.
+// cover images. Set in Geist on a grey spine, it needs no assets at all and a
+// cover can still be supplied per book when one is worth showing.
 templ Shelf(v View) {
 	@Layout(v) {
-		@PageHead(v.Section.Title, v.Lede, len(v.Books))
+		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
-		<div class="card">
-			if len(v.Books) == 0 {
-				<p class="empty">
-					No books yet. Add a <code>books:</code> list to
-					<code>content/not-code/reading.md</code>.
-				</p>
-			} else {
-				<div class="shelf">
-					<div class="shelf-books">
-						for _, b := range v.Books {
-							@spine(b)
-						}
-					</div>
-					<div class="shelf-board" aria-hidden="true"></div>
+		if len(v.Page.Books) == 0 {
+			<p class="empty">
+				No books yet. Add a <code>books:</code> list to
+				<code>content/not-code/reading.md</code>.
+			</p>
+		} else {
+			<div class="meta-rule">
+				<span>{ countLabel(len(v.Page.Books)) }</span>
+				<span>Shelf</span>
+			</div>
+			<div class="shelf" role="list">
+				<div class="shelf-books">
+					for _, b := range v.Page.Books {
+						@spine(b)
+					}
 				</div>
-			}
-		</div>
+				<div class="shelf-board" aria-hidden="true"></div>
+			</div>
+		}
 		if v.Page.WordCount > 0 {
-			<article class="prose" style="margin-top:32px">
+			<article class="prose shelf-note">
 				@templ.Raw(string(v.Page.Body))
 			</article>
 		}
@@ -39,7 +41,7 @@ templ Shelf(v View) {
 }
 
 templ spine(b content.Book) {
-	<div class="spine" title={ b.Title + " — " + b.Author }>
+	<div class="spine" role="listitem" title={ b.Title + " — " + b.Author }>
 		if b.Cover != "" {
 			<img class="spine-cover" src={ b.Cover } alt={ b.Title } loading="lazy" decoding="async"/>
 		} else {

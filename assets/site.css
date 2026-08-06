@@ -1,55 +1,43 @@
 @import "tailwindcss";
 
 /* Tailwind must scan .templ sources, not the generated _templ.go files: class
-   names only exist in the former. */
+   names only exist in the former. This is the single most common way a templ
+   plus Tailwind build silently loses styles. */
 @source "../internal/ui/**/*.templ";
 
 /* Declared on :root rather than in @theme. Tailwind v4 tree-shakes theme
    variables that no generated utility references, and every token here is
-   consumed by hand-written CSS, so @theme would emit none of them. */
+   consumed by hand-written CSS below, so @theme would emit none of them and
+   the whole design system would silently resolve to nothing. */
 :root {
-  /* A white page with light grey cards rather than flat text on white. The
-     surfaces are most of what makes a layout read as deliberate. */
-  --page: #ffffff;
-  --surface: #f8f8f9;
-  --surface-2: #f1f1f3;
-  --border: #e6e8ea;
-  --border-strong: #d8dbde;
-
-  --ink: #141517;
-  --muted: #6b6f76;
-  --faint: #9ba0a6;
-
-  --accent: #141517;
+  --color-paper: #ffffff;
+  --color-ink: #0a0a0a;
+  --color-grey-700: #4a4a4a;
+  --color-grey-500: #8a8a8a;
+  --color-grey-300: #c4c4c4;
+  --color-grey-100: #ededed;
 
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Two radii used consistently is most of what "polished" means. */
-  --r-card: 24px;
-  --r-md: 14px;
-  --r-sm: 8px;
-  --r-pill: 999px;
+  --accent: #0a0a0a;
+  --measure: 900px;
+  --gutter: 72px;
 
-  --container: 1180px;
-  --gutter: 40px;
+  /* The type scale. Every font-size on the site must reference one of these:
+     nothing else is allowed a raw px value. `make check` greps for violations,
+     because a design system drifts one hardcoded 14px at a time. */
+  --fs-mono: 12px;   /* all monospace metadata, rails, colophon, labels */
+  --fs-ui: 15px;     /* nav, tabs, standfirst, row subtitles, footer */
+  --fs-body: 17px;   /* prose */
+  --fs-title: 19px;  /* list row titles, h3 */
+  --fs-h2: 24px;
+  --fs-display: 76px;    /* page titles; the home wordmark is fluid */
+  --fs-display-sm: 44px; /* the same, below 768px */
 
-  /* The type scale. Every font-size references one of these; `make scale`
-     fails the build on a raw px value. */
-  --fs-mono: 12px;
-  --fs-sm: 13px;
-  --fs-ui: 15px;
-  --fs-body: 16px;
-  --fs-lead: 18px;
-  --fs-h3: 20px;
-  --fs-h2: 30px;
-  --fs-hero: clamp(32px, 4.6vw, 58px);
-
-  --lh-tight: 1.15;
-  --lh-snug: 1.35;
-  --lh-body: 1.6;
-
-  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --lh-tight: 1.3;
+  --lh-body: 1.65;
+  --lh-ui: 1.5;
 }
 
 @font-face {
@@ -73,22 +61,22 @@ html {
 }
 
 body {
-  background: var(--page);
-  color: var(--ink);
+  background: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
 }
 
+.shell {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 72px var(--gutter) 120px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
-}
-
-.shell {
-  max-width: var(--container);
-  margin: 0 auto;
-  padding: 24px var(--gutter) 64px;
 }
 
 .skip {
@@ -98,440 +86,293 @@ a {
 .skip:focus {
   left: 16px;
   top: 16px;
-  background: var(--ink);
-  color: var(--page);
+  background: var(--color-ink);
+  color: var(--color-paper);
   padding: 8px 12px;
-  border-radius: var(--r-sm);
   z-index: 10;
 }
 
 :focus-visible {
-  outline: 2px solid var(--ink);
+  outline: 2px solid var(--accent);
   outline-offset: 3px;
-  border-radius: var(--r-sm);
 }
 
 .icon {
   display: inline-block;
   vertical-align: -2px;
-  flex: 0 0 auto;
+  margin-left: 4px;
 }
 
-/* ---------- header ---------- */
+/* ---------- nav and tabs ---------- */
 
-.masthead {
+.nav,
+.tabs {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 12px 0 56px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+  gap: 10px 22px;
   font-size: var(--fs-ui);
-  font-weight: 500;
-  white-space: nowrap;
-}
-.brand-mark {
-  width: 30px;
-  height: 30px;
-  border-radius: var(--r-pill);
-  background: var(--ink);
-  flex: 0 0 auto;
-  display: grid;
-  place-items: center;
-  color: var(--page);
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  font-weight: 500;
-}
-.brand-sub {
-  color: var(--faint);
-  font-weight: 400;
+  flex-wrap: wrap;
 }
 
-/* Nav items are pills. The active one carries a filled background rather than
-   an underline: it reads as a control, which is what makes a header feel
-   built rather than typeset. */
 .nav {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  font-size: var(--fs-ui);
-}
-.nav a {
-  padding: 8px 14px;
-  border-radius: var(--r-pill);
-  color: var(--muted);
-  transition: background 160ms var(--ease), color 160ms var(--ease);
+  margin-bottom: 72px;
+  color: var(--color-grey-500);
 }
 .nav a:hover {
-  color: var(--ink);
-  background: var(--surface);
+  color: var(--color-ink);
 }
-.nav a.on {
-  color: var(--ink);
-  background: var(--surface-2);
-  font-weight: 500;
+/* The active item keeps ink-coloured text and carries the accent only on the
+   underline: a 2px border is non-text, so 3:1 suffices there, while accent on
+   the label itself would need 4.5:1. */
+.nav .on,
+.tabs .on {
+  color: var(--color-ink);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
 }
 
-/* ---------- pills and badges ---------- */
+.tabs {
+  margin: -8px 0 44px;
+  color: var(--color-grey-500);
+}
+.tabs a:hover {
+  color: var(--color-ink);
+}
 
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 16px;
-  border-radius: var(--r-pill);
+/* ---------- display titles ---------- */
+
+.page-head {
+  margin-bottom: 40px;
+}
+
+/* Four ghost layers as text-shadows on one element. No duplicate DOM, so no
+   phantom find-in-page matches and no polluted text selection. */
+.echo {
+  font-size: var(--fs-display);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  padding-top: 52px;
+  text-shadow:
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent;
+  transition: text-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.echo.is-in {
+  text-shadow:
+    0 -12px 0 var(--color-grey-300),
+    0 -24px 0 #d6d6d6,
+    0 -36px 0 #e4e4e4,
+    0 -48px 0 var(--color-grey-100);
+}
+
+.standfirst {
   font-size: var(--fs-ui);
-  font-weight: 500;
-  background: var(--ink);
-  color: var(--page);
-  transition: opacity 160ms var(--ease);
+  color: var(--color-grey-500);
+  margin-top: 14px;
+  max-width: 52ch;
+}
+
+/* Homepage wordmark: the weight wave. Advance widths are stable because Geist
+   varies on weight only, so the word never reflows as it animates. */
+.wordmark {
+  font-size: clamp(44px, 10.4vw, 94px);
+  line-height: 0.92;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+  margin-bottom: 48px;
+}
+.wordmark .word {
+  display: inline-block;
   white-space: nowrap;
 }
-.pill:hover {
-  opacity: 0.86;
+.wordmark .word + .word {
+  margin-left: 0.24em;
 }
-.pill-ghost {
-  background: transparent;
-  color: var(--ink);
-  border: 1px solid var(--border);
-}
-.pill-ghost:hover {
-  background: var(--surface);
-  opacity: 1;
+.wordmark .ltr {
+  display: inline-block;
+  font-variation-settings: "wght" 800;
+  will-change: font-variation-settings;
 }
 
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 8px 16px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-pill);
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-.badge-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: var(--r-pill);
-  background: var(--accent);
-  flex: 0 0 auto;
-}
+/* ---------- rules and lists ---------- */
 
-.count {
-  display: inline-grid;
-  place-items: center;
-  min-width: 22px;
-  height: 22px;
-  padding: 0 7px;
-  border-radius: var(--r-pill);
-  background: var(--surface-2);
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-}
-
-/* ---------- hero ---------- */
-
-.hero {
-  padding: 8px 0 72px;
-}
-.hero h1 {
-  font-size: var(--fs-hero);
-  font-weight: 500;
-  line-height: var(--lh-tight);
-  letter-spacing: -0.032em;
-  max-width: 19ch;
-}
-.hero-meta {
+.meta-rule {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-top: 36px;
-}
-
-/* ---------- cards ---------- */
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-.col-4 {
-  grid-column: span 4;
-}
-.col-6 {
-  grid-column: span 6;
-}
-.col-8 {
-  grid-column: span 8;
-}
-.col-12 {
-  grid-column: span 12;
-}
-
-.card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: baseline;
   gap: 16px;
-  transition: border-color 200ms var(--ease), transform 200ms var(--ease);
+  border-top: 1px solid var(--color-ink);
+  padding-top: 10px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-grey-500);
 }
-.card:hover {
-  border-color: var(--border-strong);
+.meta-rule .more {
+  color: var(--color-grey-500);
 }
-a.card:hover {
-  transform: translateY(-2px);
-}
-
-.card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: var(--fs-ui);
-  font-weight: 500;
-}
-.card-title .dim {
-  color: var(--faint);
-  font-weight: 400;
-}
-.card-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 4px;
-}
-.card-note {
-  font-size: var(--fs-sm);
-  color: var(--muted);
+.meta-rule .more:hover {
+  color: var(--accent);
 }
 
-/* ---------- rows ---------- */
-
-.rows {
+.list {
   list-style: none;
-  display: flex;
-  flex-direction: column;
 }
-.row a,
+
+.row {
+  border-bottom: 1px solid var(--color-grey-100);
+}
+.row > a,
 .row > div {
   display: flex;
   align-items: flex-start;
-  gap: 14px;
-  padding: 11px 12px;
-  border-radius: var(--r-md);
-  transition: background 160ms var(--ease);
-}
-.row a:hover {
-  background: var(--page);
-}
-.row-date {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--faint);
-  flex: 0 0 auto;
-  min-width: 52px;
-  padding-top: 4px;
-}
-/* Work periods vary in length ("Jun 2025 —" against "Aug 2022 — Oct 2024").
-   A fixed column keeps every job title on the same left edge. */
-.row-period {
-  min-width: 148px;
+  gap: 20px;
+  padding: 18px 0;
+  position: relative;
 }
 
-.row-main {
+/* The blueprint showing through, on demand only. */
+.row > a::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-grey-100) 0 1px,
+    transparent 1px 24px
+  );
+  opacity: 0;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+.row > a:hover::before {
+  opacity: 0.5;
+}
+
+.row-body {
   flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  min-width: 0;
 }
 .row-title {
-  font-size: var(--fs-ui);
+  font-size: var(--fs-title);
   font-weight: 500;
-  letter-spacing: -0.011em;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+.row > a:hover .row-title {
+  color: var(--accent);
 }
 .row-sub {
-  font-size: var(--fs-sm);
-  color: var(--muted);
+  font-size: var(--fs-ui);
+  color: var(--color-grey-500);
+}
+.row-rail {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--color-grey-500);
+  white-space: nowrap;
+  padding-top: 4px;
+}
+.row .org {
+  color: var(--color-grey-500);
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.thumb {
+  flex: 0 0 132px;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
-  text-overflow: ellipsis;
+  border-radius: 3px;
+  background: var(--color-grey-100);
 }
-.row-sub.wrap {
-  white-space: normal;
-}
-.row-go {
-  color: var(--faint);
-  margin-top: 3px;
-  flex: 0 0 auto;
-  transition: transform 160ms var(--ease), color 160ms var(--ease);
-}
-.row a .icon {
-  color: var(--faint);
-  margin-top: 3px;
-  transition: transform 160ms var(--ease), color 160ms var(--ease);
-}
-.row a:hover .icon {
-  color: var(--ink);
-  transform: translateX(2px);
-}
-.row a:hover .row-go {
-  color: var(--ink);
-  transform: translateX(2px);
-}
-.row-thumb {
-  flex: 0 0 auto;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--r-md);
-  background: var(--surface-2);
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-}
-.row-thumb img {
+.thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-.row-mark {
-  width: 15px;
-  height: 15px;
+/* Generated fallback so a project with no screenshot reads as deliberate. */
+.thumb-fallback {
+  background: var(--color-grey-100);
+  position: relative;
+}
+.thumb-fallback::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
   background: var(--accent);
   clip-path: polygon(0 0, 100% 0, 100% 62%, 62% 100%, 0 100%);
-  border-radius: 2px;
   opacity: 0.85;
 }
 
 .empty {
-  color: var(--faint);
-  font-size: var(--fs-sm);
-  padding: 10px 12px;
-}
-
-/* ---------- page headers ---------- */
-
-.page-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  flex-wrap: wrap;
-  padding-bottom: 24px;
-  margin-bottom: 28px;
-  border-bottom: 1px solid var(--border);
-}
-.page-head h1 {
-  font-size: var(--fs-h2);
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: var(--lh-tight);
-}
-.page-head .lede {
+  color: var(--color-grey-500);
   font-size: var(--fs-ui);
-  color: var(--muted);
-  margin-top: 8px;
-  max-width: 58ch;
+  padding: 20px 0;
 }
 
-.tabs {
-  display: flex;
-  gap: 2px;
-  flex-wrap: wrap;
-  font-size: var(--fs-ui);
-  margin-bottom: 28px;
-}
-.tabs a {
-  padding: 7px 13px;
-  border-radius: var(--r-pill);
-  color: var(--muted);
-  transition: background 160ms var(--ease), color 160ms var(--ease);
-}
-.tabs a:hover {
-  color: var(--ink);
-  background: var(--surface);
-}
-.tabs a.on {
-  color: var(--ink);
-  background: var(--surface-2);
-  font-weight: 500;
+.home-block {
+  margin-top: 72px;
 }
 
-.section-label {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 56px 0 16px;
-}
-.section-label h2 {
-  font-size: var(--fs-h3);
-  font-weight: 500;
-  letter-spacing: -0.02em;
+.intro {
+  margin-bottom: 72px;
+  max-width: 54ch;
 }
 
 /* ---------- prose ---------- */
 
-.prose {
-  font-size: var(--fs-body);
-  max-width: 66ch;
-}
 .prose > * + * {
-  margin-top: 22px;
+  margin-top: 28px;
 }
 .prose h2 {
-  font-size: var(--fs-h3);
+  font-size: var(--fs-h2);
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: var(--lh-snug);
-  margin-top: 40px;
+  line-height: var(--lh-tight);
+  margin-top: 48px;
 }
 .prose h3 {
-  font-size: var(--fs-lead);
+  font-size: var(--fs-title);
   font-weight: 500;
-  margin-top: 30px;
+  margin-top: 36px;
+}
+.prose p {
+  max-width: 62ch;
+}
+.prose h2,
+.prose h3,
+.prose blockquote {
+  max-width: 62ch;
 }
 .prose a {
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: var(--border-strong);
+  text-decoration-color: var(--color-grey-300);
 }
 .prose a:hover {
-  text-decoration-color: var(--ink);
+  color: var(--accent);
+  text-decoration-color: var(--accent);
 }
 .prose ul,
 .prose ol {
   padding-left: 20px;
+  max-width: 62ch;
+}
+.prose li + li {
+  margin-top: 8px;
 }
 .prose ul {
   list-style: disc;
@@ -539,32 +380,25 @@ a.card:hover {
 .prose ol {
   list-style: decimal;
 }
-.prose li + li {
-  margin-top: 6px;
-}
-.prose li::marker {
-  color: var(--faint);
-}
 .prose blockquote {
-  border-left: 2px solid var(--border-strong);
-  padding-left: 18px;
-  color: var(--muted);
+  border-left: 2px solid var(--color-grey-300);
+  padding-left: 20px;
+  color: var(--color-grey-700);
 }
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.88em;
-  background: var(--surface-2);
-  padding: 2px 6px;
-  border-radius: var(--r-sm);
+  background: var(--color-grey-100);
+  padding: 2px 5px;
+  border-radius: 3px;
 }
 .prose pre {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 18px;
-  border-radius: var(--r-md);
+  background: var(--color-grey-100);
+  padding: 20px;
+  border-radius: 4px;
   overflow-x: auto;
   font-size: var(--fs-mono);
-  line-height: var(--lh-snug);
+  line-height: var(--lh-ui);
 }
 .prose pre code {
   background: none;
@@ -573,18 +407,18 @@ a.card:hover {
 .prose img {
   max-width: 100%;
   height: auto;
-  border-radius: var(--r-md);
+  border-radius: 4px;
 }
 .prose hr {
   border: 0;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--color-grey-100);
 }
 
 .anchor {
   opacity: 0;
   margin-left: 8px;
-  color: var(--faint);
-  transition: opacity 140ms var(--ease);
+  color: var(--color-grey-300);
+  transition: opacity 140ms ease;
 }
 h2:hover .anchor,
 h3:hover .anchor,
@@ -593,18 +427,16 @@ h3:hover .anchor,
 }
 
 .toc {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 16px 18px;
-  margin: 28px 0;
+  border-left: 2px solid var(--color-grey-100);
+  padding-left: 20px;
+  margin: 32px 0;
 }
 .toc-label {
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--faint);
+  color: var(--color-grey-500);
   margin-bottom: 8px;
 }
 .toc ol {
@@ -612,208 +444,111 @@ h3:hover .anchor,
   font-size: var(--fs-ui);
 }
 .toc a:hover {
-  color: var(--ink);
+  color: var(--accent);
 }
 
-.pre-wrap {
-  position: relative;
-}
 .copy-btn {
   position: absolute;
   top: 10px;
   right: 10px;
-  background: var(--page);
-  border: 1px solid var(--border);
-  border-radius: var(--r-sm);
-  padding: 5px 7px;
-  color: var(--muted);
+  background: var(--color-paper);
+  border: 1px solid var(--color-grey-100);
+  border-radius: 3px;
+  padding: 4px 6px;
+  color: var(--color-grey-500);
   cursor: pointer;
   opacity: 0;
-  transition: opacity 140ms var(--ease);
+  transition: opacity 140ms ease;
+}
+.pre-wrap {
+  position: relative;
 }
 .pre-wrap:hover .copy-btn {
   opacity: 1;
 }
 
-.article-meta {
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--faint);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-/* ---------- bookshelf ---------- */
-
-/* Spines are typographic rather than scanned covers: publisher artwork would
-   be the only colour on the page, and the section would depend on chasing
-   down images. A cover can still be supplied per book. */
-.shelf {
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 4px 2px 0;
-}
-.shelf-books {
-  display: flex;
-  align-items: flex-end;
-  gap: 6px;
-  min-height: 172px;
-}
-.spine {
-  flex: 0 0 auto;
-  width: 38px;
-  height: 156px;
-  background: var(--page);
-  border: 1px solid var(--border);
-  border-bottom: none;
-  border-radius: var(--r-sm) var(--r-sm) 0 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 9px 0;
-  transform-origin: bottom center;
-  transition: transform 220ms var(--ease), border-color 220ms var(--ease);
-}
-.spine:hover {
-  transform: translateY(-9px);
-  border-color: var(--ink);
-}
-.spine:nth-child(3n) {
-  height: 168px;
-  width: 44px;
-}
-.spine:nth-child(4n) {
-  height: 146px;
-}
-.spine:nth-child(5n) {
-  width: 32px;
-}
-.spine-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  display: flex;
-  align-items: baseline;
-  gap: 9px;
-  white-space: nowrap;
-  overflow: hidden;
-  max-height: 100%;
-}
-.spine-title {
-  font-size: var(--fs-sm);
-  font-weight: 500;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-height: 0;
-}
-.spine-author {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--faint);
-  flex: 0 0 auto;
-}
-.spine-cover {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 2px;
-}
-.shelf-board {
-  height: 5px;
-  background: var(--ink);
-  border-radius: 1px;
-  min-width: 100%;
-  margin-top: -1px;
-}
-
 /* ---------- component gallery ---------- */
 
 .gallery {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
-}
-.specimen {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 8px;
+}
+.specimen {
+  border-bottom: 1px solid var(--color-grey-100);
+  padding: 24px 0;
+}
+.specimen-head {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  margin-bottom: 16px;
 }
 .specimen-name {
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
 }
 .specimen-note {
-  font-size: var(--fs-sm);
-  color: var(--muted);
+  font-size: var(--fs-ui);
+  color: var(--color-grey-500);
 }
 .specimen-render {
-  background: var(--page);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
   padding: 20px;
-  display: grid;
-  place-items: center;
-  min-height: 72px;
+  background: var(--color-grey-100);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.specimen-scale {
+  transform: scale(0.42);
+  transform-origin: left top;
+  /* The echo ghosts sit 48px above the baseline inside the element's padding.
+     At 0.42 scale the box still needs room for all of it, or the container
+     clips the very thing this specimen exists to demonstrate. */
+  height: 108px;
 }
 .specimen-code {
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
-  color: var(--muted);
+  color: var(--color-grey-700);
 }
 .install {
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
-  color: var(--muted);
-  background: var(--surface-2);
-  padding: 3px 7px;
-  border-radius: var(--r-sm);
+  color: var(--color-grey-700);
+  background: var(--color-grey-100);
+  padding: 2px 6px;
+  border-radius: 3px;
   align-self: flex-start;
+  margin-top: 4px;
 }
 
 /* ---------- footer ---------- */
 
 .footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  flex-wrap: wrap;
-  margin-top: 80px;
-  padding-top: 22px;
-  border-top: 1px solid var(--border);
-  font-size: var(--fs-sm);
-  color: var(--muted);
+  margin-top: 96px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-grey-100);
 }
 .footer-links {
   display: flex;
-  gap: 6px;
-}
-.footer-links a {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 6px 11px;
-  border-radius: var(--r-pill);
-  transition: background 160ms var(--ease), color 160ms var(--ease);
+  gap: 20px;
+  font-size: var(--fs-ui);
+  color: var(--color-grey-500);
+  flex-wrap: wrap;
 }
 .footer-links a:hover {
-  background: var(--surface);
-  color: var(--ink);
+  color: var(--accent);
 }
 .colophon {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
+  margin-top: 28px;
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
-  color: var(--faint);
-  text-align: right;
+  letter-spacing: 0.06em;
+  color: var(--color-grey-500);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 .days {
   font-variant-numeric: tabular-nums;
@@ -821,40 +556,46 @@ h3:hover .anchor,
 
 /* ---------- responsive ---------- */
 
-@media (max-width: 960px) {
-  .col-4,
-  .col-6,
-  .col-8 {
-    grid-column: span 12;
-  }
-}
-
-@media (max-width: 720px) {
+@media (max-width: 768px) {
   :root {
-    --gutter: 20px;
+    --gutter: 24px;
   }
-  .masthead {
-    flex-wrap: wrap;
+  .shell {
+    padding-top: 32px;
+  }
+
+  .echo {
+    font-size: var(--fs-display-sm);
+    padding-top: 34px;
+  }
+  .echo.is-in {
+    text-shadow:
+      0 -8px 0 var(--color-grey-300),
+      0 -16px 0 #d6d6d6,
+      0 -24px 0 #e4e4e4,
+      0 -32px 0 var(--color-grey-100);
+  }
+  /* Thumb, body and rail in one flex row leaves the title about 160px on a
+     390px screen, which wraps every heading to four lines. Drop the rail to
+     its own full-width line instead. */
+  .row > a,
+  .row > div {
     gap: 14px;
-    padding-bottom: 36px;
+    flex-wrap: wrap;
+  }
+  .thumb {
+    flex-basis: 72px;
+  }
+  .row-body {
+    flex: 1 1 60%;
+  }
+  .row-rail {
+    order: 3;
+    flex: 1 1 100%;
+    padding-top: 6px;
   }
   .nav {
-    order: 3;
-    width: 100%;
-    overflow-x: auto;
-  }
-  .hero {
-    padding-bottom: 48px;
-  }
-  .hero h1 {
-    max-width: none;
-  }
-  .footer {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .colophon {
-    text-align: left;
+    margin-bottom: 48px;
   }
 }
 
@@ -867,18 +608,122 @@ h3:hover .anchor,
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
   }
-  a.card:hover,
-  .spine:hover,
-  .row a .icon {
-  color: var(--faint);
-  margin-top: 3px;
-  transition: transform 160ms var(--ease), color 160ms var(--ease);
+  .echo {
+    text-shadow:
+      0 -12px 0 var(--color-grey-300),
+      0 -24px 0 #d6d6d6,
+      0 -36px 0 #e4e4e4,
+      0 -48px 0 var(--color-grey-100);
+  }
+  .row > a::before {
+    display: none;
+  }
 }
-.row a:hover .icon {
-  color: var(--ink);
-  transform: translateX(2px);
+
+/* ---------- bookshelf ---------- */
+
+/* Books stand on a shelf. Spines are typographic, so the section needs no
+   cover images to look finished, and a real cover can be dropped in per book
+   when one is worth showing. */
+.shelf {
+  margin: 32px 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
 }
-.row a:hover .row-go {
+
+.shelf-books {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  padding: 0 2px;
+  min-height: 210px;
+}
+
+.spine {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 190px;
+  background: var(--color-grey-100);
+  border: 1px solid var(--color-grey-300);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 0;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 220ms ease;
+  transform-origin: bottom center;
+}
+.spine:hover {
+  transform: translateY(-10px);
+  background: var(--color-paper);
+  border-color: var(--color-ink);
+}
+
+/* Every third spine sits marginally taller and wider, so the row reads as a
+   shelf of different books rather than a bar chart. */
+.spine:nth-child(3n) {
+  height: 205px;
+  width: 48px;
+}
+.spine:nth-child(4n) {
+  height: 178px;
+}
+.spine:nth-child(5n) {
+  width: 36px;
+}
+
+.spine-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 100%;
+}
+.spine-title {
+  font-size: var(--fs-ui);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  /* A long title must truncate rather than push the author off the spine. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 0;
+}
+.spine-author {
+  flex: 0 0 auto;
+}
+.spine-author {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--color-grey-500);
+}
+.spine-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1px;
+}
+
+.shelf-board {
+  height: 6px;
+  background: var(--color-ink);
+  border-radius: 1px;
+  min-width: 100%;
+}
+
+.shelf-note {
+  margin-top: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spine:hover {
     transform: none;
   }
 }
