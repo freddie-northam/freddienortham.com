@@ -7,6 +7,9 @@ import "time"
 // (see build.WarnPlaceholders) so none of them can reach production unnoticed.
 type Config struct {
 	Name        string
+	Role        string
+	Headline    string
+	Status      string
 	Domain      string
 	BaseURL     string
 	Description string
@@ -25,7 +28,14 @@ const Placeholder = "TODO"
 var birth = mustDate("2003-01-01") // TODO: real birth date
 
 var Site = Config{
-	Name:        "Freddie Northam",
+	Name: "Freddie Northam",
+	Role: "Co-founder & Head of Product at XALT",
+
+	// The homepage opens with a sentence, not a name. A name at 96px says
+	// nothing; this says what he does and the one fact nobody expects.
+	Headline: "Co-founder and Head of Product at XALT, building the tools brands use to reach their fans. I started at 14 and never went to university.",
+	Status:   "Building at XALT",
+
 	Domain:      "freddienortham.com",
 	BaseURL:     "https://freddienortham.com",
 	Description: "Co-founder and Head of Product at XALT. Writing, projects, and everything else.",

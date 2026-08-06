@@ -5,70 +5,67 @@ package ui
 // weekend build.
 templ Projects(v View) {
 	@Layout(v) {
-		@PageTitle(v.Section.Title, v.Lede)
-		<section class="home-block">
-			<div class="meta-rule">
-				<span>Work</span>
-				if !v.ShowAllWork {
-					<a class="more" href="/projects/all/">
-						view all
-						@ArrowRight()
-					</a>
-				} else {
-					<a class="more" href="/projects/">
-						back
-						@ArrowLeft()
-					</a>
-				}
-			</div>
-			<ul class="list" data-grid>
+		@PageHead(v.Section.Title, v.Lede, 0)
+		<div class="section-label">
+			<h2>Work</h2>
+			if !v.ShowAllWork {
+				<a class="pill pill-ghost" href="/projects/all/">
+					View all
+					@ArrowRight()
+				</a>
+			} else {
+				<a class="pill pill-ghost" href="/projects/">
+					Back
+					@ArrowLeft()
+				</a>
+			}
+		</div>
+		<div class="card">
+			<ul class="rows">
 				for _, r := range v.Work {
 					@roleRow(r)
 				}
 			</ul>
-		</section>
+		</div>
 		if !v.ShowAllWork {
-			<section class="home-block">
-				<div class="meta-rule">
-					<span>Built</span>
-					<span>{ countLabel(len(v.Pages)) }</span>
-				</div>
-				if len(v.Pages) > 0 {
-					<ul class="list" data-grid>
-						for _, p := range v.Pages {
-							@Row(p)
+			<div class="section-label">
+				<h2>Built</h2>
+				<span class="count">{ countStr(len(v.Rows)) }</span>
+			</div>
+			<div class="card">
+				if len(v.Rows) == 0 {
+					<p class="empty">Nothing published here yet.</p>
+				} else {
+					<ul class="rows">
+						for _, r := range v.Rows {
+							@Row(r)
 						}
 					</ul>
-				} else {
-					<p class="empty">Nothing here yet.</p>
 				}
-			</section>
+			</div>
 		}
 	}
 }
 
 templ roleRow(r Role) {
-	<li class="row role">
+	<li class="row">
 		if r.URL != "" {
 			<a href={ templ.SafeURL(r.URL) } rel="noopener">
 				@roleBody(r)
-				<span class="row-rail">{ r.Period }</span>
+				@ArrowUpRight()
 			</a>
 		} else {
 			<div>
 				@roleBody(r)
-				<span class="row-rail">{ r.Period }</span>
 			</div>
 		}
 	</li>
 }
 
 templ roleBody(r Role) {
-	<span class="row-body">
-		<span class="row-title">
-			{ r.Title }
-			<span class="org">{ r.Org }</span>
-		</span>
-		<span class="row-sub">{ r.Summary }</span>
+	<span class="row-date row-period">{ r.Period }</span>
+	<span class="row-main">
+		<span class="row-title">{ r.Title } · { r.Org }</span>
+		<span class="row-sub wrap">{ r.Summary }</span>
 	</span>
 }
