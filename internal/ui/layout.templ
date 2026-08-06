@@ -1,0 +1,103 @@
+package ui
+
+import "fmt"
+
+templ Layout(v View) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="utf-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1"/>
+			<title>{ v.FullTitle() }</title>
+			<meta name="description" content={ v.Description }/>
+			<link rel="canonical" href={ v.CanonicalURL() }/>
+			if v.Site.NoIndex {
+				<meta name="robots" content="noindex, nofollow"/>
+			}
+			<meta property="og:type" content="website"/>
+			<meta property="og:site_name" content={ v.Site.Name }/>
+			<meta property="og:title" content={ v.FullTitle() }/>
+			<meta property="og:description" content={ v.Description }/>
+			<meta property="og:url" content={ v.CanonicalURL() }/>
+			<meta name="twitter:card" content="summary"/>
+			<meta name="twitter:title" content={ v.FullTitle() }/>
+			<meta name="twitter:description" content={ v.Description }/>
+			<link rel="icon" type="image/svg+xml" href={ fmt.Sprintf("/favicon-%s.svg", v.Favicon) }/>
+			<link rel="icon" type="image/png" sizes="32x32" href={ fmt.Sprintf("/favicon-%s-32.png", v.Favicon) }/>
+			<link rel="apple-touch-icon" sizes="180x180" href={ fmt.Sprintf("/favicon-%s-180.png", v.Favicon) }/>
+			<link rel="alternate" type="application/rss+xml" title={ v.Site.Name } href="/feed.xml"/>
+			<link rel="preload" href="/fonts/Geist-Variable.woff2" as="font" type="font/woff2" crossorigin/>
+			<link rel="stylesheet" href="/site.css"/>
+			<script src="/site.js" defer></script>
+		</head>
+		<body style={ fmt.Sprintf("--accent:%s", v.Accent) }>
+			<a class="skip" href="#main">Skip to content</a>
+			<div class="shell">
+				<nav class="nav" aria-label="Primary">
+					for _, l := range v.Nav {
+						if l.Active {
+							<a href={ templ.SafeURL(l.URL) } class="on" aria-current="page">{ l.Title }</a>
+						} else {
+							<a href={ templ.SafeURL(l.URL) }>{ l.Title }</a>
+						}
+					}
+				</nav>
+				<main id="main">
+					{ children... }
+				</main>
+				@footer(v)
+			</div>
+		</body>
+	</html>
+}
+
+// tabs renders sub-sections. Every tab is a real URL, so this works with
+// JavaScript disabled and each tab can be linked to directly.
+templ tabs(v View) {
+	if len(v.Tabs) > 0 {
+		<nav class="tabs" aria-label="Sections">
+			for _, l := range v.Tabs {
+				if l.Active {
+					<a href={ templ.SafeURL(l.URL) } class="on" aria-current="page">{ l.Title }</a>
+				} else {
+					<a href={ templ.SafeURL(l.URL) }>{ l.Title }</a>
+				}
+			}
+		</nav>
+	}
+}
+
+templ footer(v View) {
+	<footer class="footer">
+		<div class="footer-links">
+			<a href={ templ.SafeURL(v.Site.GitHub) } rel="me noopener">
+				github
+				@ArrowUpRight()
+			</a>
+			if v.Site.X != "TODO" {
+				<a href={ templ.SafeURL(v.Site.X) } rel="me noopener">
+					x
+					@ArrowUpRight()
+				</a>
+			}
+			<a href={ templ.SafeURL(v.Site.LinkedIn) } rel="me noopener">
+				linkedin
+				@ArrowUpRight()
+			</a>
+			if v.Site.Email != "TODO" {
+				<a href={ templ.SafeURL("mailto:" + v.Site.Email) }>
+					email
+					@ArrowUpRight()
+				</a>
+			}
+			<a href="/feed.xml">
+				rss
+				@Rss()
+			</a>
+		</div>
+		<p class="colophon">
+			<span data-days={ fmt.Sprint(v.DaysZero) } class="days">&nbsp;</span>
+			<span class="aphorism">{ v.Site.Colophon }</span>
+		</p>
+	</footer>
+}

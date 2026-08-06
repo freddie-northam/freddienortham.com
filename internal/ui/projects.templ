@@ -1,0 +1,74 @@
+package ui
+
+// Projects carries two blocks: roles held, then things built. Keeping them
+// apart stops a four-year co-founder role reading with the same weight as a
+// weekend build.
+templ Projects(v View) {
+	@Layout(v) {
+		@PageTitle(v.Section.Title, v.Description)
+		<section class="home-block">
+			<div class="meta-rule">
+				<span>Work</span>
+				if !v.ShowAllWork {
+					<a class="more" href="/projects/all/">
+						view all
+						@ArrowRight()
+					</a>
+				} else {
+					<a class="more" href="/projects/">
+						back
+						@ArrowLeft()
+					</a>
+				}
+			</div>
+			<ul class="list" data-grid>
+				for _, r := range v.Work {
+					@roleRow(r)
+				}
+			</ul>
+		</section>
+		if !v.ShowAllWork {
+			<section class="home-block">
+				<div class="meta-rule">
+					<span>Built</span>
+					<span>{ countLabel(len(v.Pages)) }</span>
+				</div>
+				if len(v.Pages) > 0 {
+					<ul class="list" data-grid>
+						for _, p := range v.Pages {
+							@Row(p)
+						}
+					</ul>
+				} else {
+					<p class="empty">Nothing here yet.</p>
+				}
+			</section>
+		}
+	}
+}
+
+templ roleRow(r Role) {
+	<li class="row role">
+		if r.URL != "" {
+			<a href={ templ.SafeURL(r.URL) } rel="noopener">
+				@roleBody(r)
+				<span class="row-rail">{ r.Period }</span>
+			</a>
+		} else {
+			<div>
+				@roleBody(r)
+				<span class="row-rail">{ r.Period }</span>
+			</div>
+		}
+	</li>
+}
+
+templ roleBody(r Role) {
+	<span class="row-body">
+		<span class="row-title">
+			{ r.Title }
+			<span class="org">{ r.Org }</span>
+		</span>
+		<span class="row-sub">{ r.Summary }</span>
+	</span>
+}

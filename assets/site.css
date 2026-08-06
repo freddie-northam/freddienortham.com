@@ -1,0 +1,603 @@
+@import "tailwindcss";
+
+/* Tailwind must scan .templ sources, not the generated _templ.go files: class
+   names only exist in the former. This is the single most common way a templ
+   plus Tailwind build silently loses styles. */
+@source "../internal/ui/**/*.templ";
+
+/* Declared on :root rather than in @theme. Tailwind v4 tree-shakes theme
+   variables that no generated utility references, and every token here is
+   consumed by hand-written CSS below, so @theme would emit none of them and
+   the whole design system would silently resolve to nothing. */
+:root {
+  --color-paper: #ffffff;
+  --color-ink: #0a0a0a;
+  --color-grey-700: #4a4a4a;
+  --color-grey-500: #8a8a8a;
+  --color-grey-300: #c4c4c4;
+  --color-grey-100: #ededed;
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --accent: #0a0a0a;
+  --measure: 660px;
+  --gutter: 72px;
+}
+
+@font-face {
+  font-family: "Geist";
+  src: url("/fonts/Geist-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("/fonts/GeistMono-Variable.woff2") format("woff2-variations");
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+/* ---------- base ---------- */
+
+html {
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.shell {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 56px var(--gutter) 96px;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: 16px;
+  top: 16px;
+  background: var(--color-ink);
+  color: var(--color-paper);
+  padding: 8px 12px;
+  z-index: 10;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.icon {
+  display: inline-block;
+  vertical-align: -2px;
+  margin-left: 4px;
+}
+
+/* ---------- nav and tabs ---------- */
+
+.nav,
+.tabs {
+  display: flex;
+  gap: 22px;
+  font-size: 15px;
+  flex-wrap: wrap;
+}
+
+.nav {
+  margin-bottom: 72px;
+  color: var(--color-grey-500);
+}
+.nav a:hover {
+  color: var(--color-ink);
+}
+/* The active item keeps ink-coloured text and carries the accent only on the
+   underline: a 2px border is non-text, so 3:1 suffices there, while accent on
+   the label itself would need 4.5:1. */
+.nav .on,
+.tabs .on {
+  color: var(--color-ink);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 2px;
+}
+
+.tabs {
+  margin: -16px 0 40px;
+  font-size: 14px;
+  color: var(--color-grey-500);
+}
+.tabs a:hover {
+  color: var(--color-ink);
+}
+
+/* ---------- display titles ---------- */
+
+.page-head {
+  margin-bottom: 40px;
+}
+
+/* Four ghost layers as text-shadows on one element. No duplicate DOM, so no
+   phantom find-in-page matches and no polluted text selection. */
+.echo {
+  font-size: 76px;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  padding-top: 52px;
+  text-shadow:
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent,
+    0 0 0 transparent;
+  transition: text-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.echo.is-in {
+  text-shadow:
+    0 -12px 0 var(--color-grey-300),
+    0 -24px 0 #d6d6d6,
+    0 -36px 0 #e4e4e4,
+    0 -48px 0 var(--color-grey-100);
+}
+
+.standfirst {
+  font-size: 15px;
+  color: var(--color-grey-500);
+  margin-top: 14px;
+  max-width: 52ch;
+}
+
+/* Homepage wordmark: the weight wave. Advance widths are stable because Geist
+   varies on weight only, so the word never reflows as it animates. */
+.wordmark {
+  font-size: 96px;
+  line-height: 0.9;
+  letter-spacing: -0.05em;
+  font-weight: 800;
+  margin-bottom: 40px;
+}
+.wordmark .word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.wordmark .word + .word {
+  margin-left: 0.24em;
+}
+.wordmark .ltr {
+  display: inline-block;
+  font-variation-settings: "wght" 800;
+  will-change: font-variation-settings;
+}
+
+/* ---------- rules and lists ---------- */
+
+.meta-rule {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  border-top: 1px solid var(--color-ink);
+  padding-top: 10px;
+  margin-bottom: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-grey-500);
+}
+.meta-rule .more {
+  color: var(--color-grey-500);
+}
+.meta-rule .more:hover {
+  color: var(--accent);
+}
+
+.list {
+  list-style: none;
+}
+
+.row {
+  border-bottom: 1px solid var(--color-grey-100);
+}
+.row > a,
+.row > div {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 18px 0;
+  position: relative;
+}
+
+/* The blueprint showing through, on demand only. */
+.row > a::before {
+  content: "";
+  position: absolute;
+  inset: 0 -12px;
+  background-image: repeating-linear-gradient(
+    to right,
+    var(--color-grey-100) 0 1px,
+    transparent 1px 24px
+  );
+  opacity: 0;
+  transition: opacity 180ms ease;
+  pointer-events: none;
+}
+.row > a:hover::before {
+  opacity: 0.5;
+}
+
+.row-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+.row-title {
+  font-size: 19px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+}
+.row > a:hover .row-title {
+  color: var(--accent);
+}
+.row-sub {
+  font-size: 15px;
+  color: var(--color-grey-500);
+}
+.row-rail {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-grey-500);
+  white-space: nowrap;
+  padding-top: 4px;
+}
+.row .org {
+  color: var(--color-grey-500);
+  font-weight: 400;
+  margin-left: 8px;
+}
+
+.thumb {
+  flex: 0 0 132px;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border-radius: 3px;
+  background: var(--color-grey-100);
+}
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* Generated fallback so a project with no screenshot reads as deliberate. */
+.thumb-fallback {
+  background: var(--color-grey-100);
+  position: relative;
+}
+.thumb-fallback::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  background: var(--accent);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 62% 100%, 0 100%);
+  opacity: 0.85;
+}
+
+.empty {
+  color: var(--color-grey-500);
+  font-size: 15px;
+  padding: 20px 0;
+}
+
+.home-block {
+  margin-top: 56px;
+}
+
+.intro {
+  margin-bottom: 56px;
+  max-width: 54ch;
+}
+
+/* ---------- prose ---------- */
+
+.prose > * + * {
+  margin-top: 28px;
+}
+.prose h2 {
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  margin-top: 48px;
+}
+.prose h3 {
+  font-size: 19px;
+  font-weight: 500;
+  margin-top: 36px;
+}
+.prose p {
+  max-width: 62ch;
+}
+.prose a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--color-grey-300);
+}
+.prose a:hover {
+  color: var(--accent);
+  text-decoration-color: var(--accent);
+}
+.prose ul,
+.prose ol {
+  padding-left: 20px;
+  max-width: 62ch;
+}
+.prose li + li {
+  margin-top: 8px;
+}
+.prose ul {
+  list-style: disc;
+}
+.prose ol {
+  list-style: decimal;
+}
+.prose blockquote {
+  border-left: 2px solid var(--color-grey-300);
+  padding-left: 20px;
+  color: var(--color-grey-700);
+}
+.prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--color-grey-100);
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+.prose pre {
+  background: var(--color-grey-100);
+  padding: 20px;
+  border-radius: 4px;
+  overflow-x: auto;
+  font-size: 13px;
+}
+.prose pre code {
+  background: none;
+  padding: 0;
+}
+.prose img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-grey-100);
+}
+
+.anchor {
+  opacity: 0;
+  margin-left: 8px;
+  color: var(--color-grey-300);
+  transition: opacity 140ms ease;
+}
+h2:hover .anchor,
+h3:hover .anchor,
+.anchor:focus {
+  opacity: 1;
+}
+
+.toc {
+  border-left: 2px solid var(--color-grey-100);
+  padding-left: 20px;
+  margin: 32px 0;
+}
+.toc-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-grey-500);
+  margin-bottom: 8px;
+}
+.toc ol {
+  list-style: none;
+  font-size: 15px;
+}
+.toc a:hover {
+  color: var(--accent);
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--color-paper);
+  border: 1px solid var(--color-grey-100);
+  border-radius: 3px;
+  padding: 4px 6px;
+  color: var(--color-grey-500);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 140ms ease;
+}
+.pre-wrap {
+  position: relative;
+}
+.pre-wrap:hover .copy-btn {
+  opacity: 1;
+}
+
+/* ---------- component gallery ---------- */
+
+.gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.specimen {
+  border-bottom: 1px solid var(--color-grey-100);
+  padding: 24px 0;
+}
+.specimen-head {
+  display: flex;
+  gap: 16px;
+  align-items: baseline;
+  margin-bottom: 16px;
+}
+.specimen-name {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+.specimen-note {
+  font-size: 14px;
+  color: var(--color-grey-500);
+}
+.specimen-render {
+  padding: 20px;
+  background: var(--color-grey-100);
+  border-radius: 4px;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+.specimen-scale {
+  transform: scale(0.42);
+  transform-origin: left top;
+  /* The echo ghosts sit 48px above the baseline inside the element's padding.
+     At 0.42 scale the box still needs room for all of it, or the container
+     clips the very thing this specimen exists to demonstrate. */
+  height: 108px;
+}
+.specimen-code {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-grey-700);
+}
+.install {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--color-grey-700);
+  background: var(--color-grey-100);
+  padding: 2px 6px;
+  border-radius: 3px;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+/* ---------- footer ---------- */
+
+.footer {
+  margin-top: 96px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-grey-100);
+}
+.footer-links {
+  display: flex;
+  gap: 20px;
+  font-size: 15px;
+  color: var(--color-grey-500);
+  flex-wrap: wrap;
+}
+.footer-links a:hover {
+  color: var(--accent);
+}
+.colophon {
+  margin-top: 28px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  color: var(--color-grey-500);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.days {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 768px) {
+  :root {
+    --gutter: 24px;
+  }
+  .shell {
+    padding-top: 32px;
+  }
+  .wordmark {
+    font-size: 56px;
+  }
+  .echo {
+    font-size: 44px;
+    padding-top: 34px;
+  }
+  .echo.is-in {
+    text-shadow:
+      0 -8px 0 var(--color-grey-300),
+      0 -16px 0 #d6d6d6,
+      0 -24px 0 #e4e4e4,
+      0 -32px 0 var(--color-grey-100);
+  }
+  /* Thumb, body and rail in one flex row leaves the title about 160px on a
+     390px screen, which wraps every heading to four lines. Drop the rail to
+     its own full-width line instead. */
+  .row > a,
+  .row > div {
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .thumb {
+    flex-basis: 72px;
+  }
+  .row-body {
+    flex: 1 1 60%;
+  }
+  .row-rail {
+    order: 3;
+    flex: 1 1 100%;
+    padding-top: 6px;
+  }
+  .nav {
+    margin-bottom: 48px;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+  .echo {
+    text-shadow:
+      0 -12px 0 var(--color-grey-300),
+      0 -24px 0 #d6d6d6,
+      0 -36px 0 #e4e4e4,
+      0 -48px 0 var(--color-grey-100);
+  }
+  .row > a::before {
+    display: none;
+  }
+}

@@ -102,10 +102,22 @@ type Section struct {
 }
 
 var Sections = []Section{
+    // Top level.
     {Slug: "blog",     Title: "Blog",     Accent: "#CC3A00", InNav: true, InFeed: true},
     {Slug: "projects", Title: "Projects", Accent: "#0033FF", InNav: true},
+    {Slug: "code",     Title: "Code",     Accent: "#7C3AED", InNav: true},
+    {Slug: "not-code", Title: "Not Code", Accent: "#047857", InNav: true},
+
+    // Sub-pages. Tabs are real URLs, so these are sections, not JS state,
+    // and each one is shareable and works without JavaScript.
+    {Slug: "components", Title: "Components", Parent: "code", Template: "components"},
+    {Slug: "cars",       Title: "Cars",       Parent: "not-code"},
+    // ...twelve children in total
 }
 ```
+
+Children inherit their parent's accent, so every page under Not Code is the same green,
+and share the parent's favicon so switching tabs does not flicker the browser tab icon.
 
 **What this claim actually covers.** Blog and Projects are the same shape: a title, a
 subtitle, and one metadata value on a right rail. Only the metadata differs (a date
@@ -436,13 +448,19 @@ hidden, the counter shows whole days and does not tick.
 
 ## 10. Scope
 
-**In, v1:** Home, Blog, Projects, RSS, 404, canonical and OpenGraph tags, the four
-motion moments, six icons, per-section favicons with PNG fallback, redirects, a local
-dev server with draft preview, responsive down to 375px.
+**Built and passing `make check`:** Home, Blog, Projects, Code (Components, Languages,
+Stacks, Skills), Not Code (eight sub-pages), RSS, `/llms.txt`, 404, canonical and
+OpenGraph tags, the four motion moments, six icons, per-section favicons with PNG
+fallback, redirects, a local dev server with draft preview, responsive down to 375px.
 
-**Out, deferred:** Code (Components, Languages, Stacks, Skills), Not Code (reading,
-music, podcasts, sports, cars, TV, film, gaming), Photos, Games, dark mode, illustrated
-characters, the widget ideas, build-time OG image generation, responsive `srcset`.
+Code and Not Code were pulled into v1 during implementation. Not Code is the only
+section that could be filled immediately, since its content already existed in the
+original brief, whereas the Blog cannot be filled until the writing is done. Deferring
+the full section and keeping the empty one was the wrong way round.
+
+**Out, deferred:** Photos, Games, dark mode, illustrated characters, the widget ideas,
+build-time OG image generation, responsive `srcset`. Photos and Games both need custom
+templates rather than the generic list, which is precisely why they are not "one line".
 
 **Explicitly not doing:** a CMS, comments, analytics beyond Cloudflare's defaults, a
 newsletter.

@@ -1,0 +1,43 @@
+package ui
+
+import "github.com/freddie-northam/freddienortham.com/internal/content"
+
+templ Home(v View) {
+	@Layout(v) {
+		<h1 class="wordmark" data-wave>
+			for _, word := range Words(v.Site.Name) {
+				<span class="word">
+					for _, ch := range word {
+						<span class="ltr">{ ch }</span>
+					}
+				</span>
+			}
+		</h1>
+		<div class="intro prose">
+			@templ.Raw(string(v.Page.Body))
+		</div>
+		if len(v.Recent) > 0 {
+			@homeBlock("Writing", "/blog/", v.Recent)
+		}
+		if len(v.Projects) > 0 {
+			@homeBlock("Projects", "/projects/", v.Projects)
+		}
+	}
+}
+
+templ homeBlock(title, href string, pages []content.Page) {
+	<section class="home-block">
+		<div class="meta-rule">
+			<span>{ title }</span>
+			<a class="more" href={ templ.SafeURL(href) }>
+				all
+				@ArrowRight()
+			</a>
+		</div>
+		<ul class="list" data-grid>
+			for _, p := range pages {
+				@Row(p)
+			}
+		</ul>
+	</section>
+}

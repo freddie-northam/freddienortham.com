@@ -1,0 +1,91 @@
+package ui
+
+// Skills lists Agent Skills, generated from SKILL.md frontmatter in the
+// submodule so this page cannot drift from the source it documents.
+templ Skills(v View) {
+	@Layout(v) {
+		@PageTitle(v.Section.Title, v.Description)
+		@tabs(v)
+		if len(v.Skills) == 0 {
+			<p class="empty">
+				No skills indexed. Add the skills repository as a submodule at
+				<code>vendor/skills</code> and rebuild.
+			</p>
+		} else {
+			<div class="meta-rule">
+				<span>{ countLabel(len(v.Skills)) }</span>
+				<span>SKILL.md</span>
+			</div>
+			<ul class="list">
+				for _, s := range v.Skills {
+					<li class="row skill">
+						<div class="row-body">
+							<span class="row-title">{ s.Name }</span>
+							<span class="row-sub">{ s.Description }</span>
+							if s.Install != "" {
+								<code class="install">{ s.Install }</code>
+							}
+						</div>
+						if s.URL != "" {
+							<a class="row-rail" href={ templ.SafeURL(s.URL) }>
+								source
+								@ArrowUpRight()
+							</a>
+						}
+					</li>
+				}
+			</ul>
+		}
+	}
+}
+
+// Components is the live gallery: each component rendered from the same code
+// the rest of the site uses, beside the source that produced it.
+templ Components(v View) {
+	@Layout(v) {
+		@PageTitle(v.Section.Title, v.Description)
+		@tabs(v)
+		<div class="meta-rule">
+			<span>{ countLabel(len(v.Components)) }</span>
+			<span>templ</span>
+		</div>
+		<div class="gallery">
+			@specimen("ArrowUpRight", "External links, in list rows and the footer.", `@ArrowUpRight()`) {
+				@ArrowUpRight()
+			}
+			@specimen("ArrowRight", "Onward navigation: view all, next article.", `@ArrowRight()`) {
+				@ArrowRight()
+			}
+			@specimen("ArrowLeft", "Previous article.", `@ArrowLeft()`) {
+				@ArrowLeft()
+			}
+			@specimen("Rss", "Feed link in the footer.", `@Rss()`) {
+				@Rss()
+			}
+			@specimen("Copy", "Copy button on code blocks.", `@Copy()`) {
+				@Copy()
+			}
+			@specimen("LinkIcon", "Heading anchors in articles.", `@LinkIcon()`) {
+				@LinkIcon()
+			}
+			@specimen("EchoTitle", "The display title. Four ghost layers as text-shadows on one element, no duplicate DOM.", `@EchoTitle("writing")`) {
+				<div class="specimen-scale">
+					@EchoTitle("writing")
+				</div>
+			}
+		</div>
+	}
+}
+
+templ specimen(name, note, snippet string) {
+	<section class="specimen">
+		<div class="specimen-head">
+			<span class="specimen-name">{ name }</span>
+			<span class="specimen-note">{ note }</span>
+		</div>
+		<div class="specimen-render">
+			{ children... }
+		</div>
+		<pre class="specimen-code"><code>{ snippet }</code></pre>
+	</section>
+}

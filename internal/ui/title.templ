@@ -1,0 +1,23 @@
+package ui
+
+// EchoTitle is the display title. The four ghost copies are layered
+// text-shadows on this single element, not duplicate DOM nodes: duplicates
+// would make find-in-page report five phantom matches and text selection
+// yield the word repeated five times. As shadows they add no nodes and are
+// invisible to assistive technology by construction.
+//
+// The cost is that per-ghost stagger is impossible, since browsers interpolate
+// a shadow stack layer by layer. The stack rises as one, which reads nearly
+// identically at this size.
+templ EchoTitle(text string) {
+	<h1 class="echo" data-echo>{ text }</h1>
+}
+
+templ PageTitle(text, standfirst string) {
+	<header class="page-head">
+		@EchoTitle(text)
+		if standfirst != "" {
+			<p class="standfirst">{ standfirst }</p>
+		}
+	</header>
+}

@@ -1,0 +1,71 @@
+package ui
+
+import "fmt"
+
+// Article is the generic page template, used by Blog posts, Projects entries
+// and every Code and Not Code sub-page. Furniture appears by length rather
+// than by section, so short pages stay clean and long ones stay navigable.
+templ Article(v View) {
+	@Layout(v) {
+		@PageTitle(v.Page.Title, v.Page.Standfirst)
+		@tabs(v)
+		if v.Page.Rail() != "" || v.Page.WordCount > 400 {
+			<div class="meta-rule">
+				<span>{ v.Page.Rail() }</span>
+				if v.Page.WordCount > 400 {
+					<span>{ fmt.Sprintf("%d min read", v.Page.ReadingMinutes()) }</span>
+				}
+			</div>
+		} else {
+			<hr class="plain-rule"/>
+		}
+		if v.Page.NeedsTOC() {
+			<nav class="toc" aria-label="Contents">
+				<p class="toc-label">Contents</p>
+				<ol>
+					for _, h := range v.Page.Headings {
+						if h.Level == 2 {
+							<li><a href={ templ.SafeURL("#" + h.ID) }>{ h.Text }</a></li>
+						}
+					}
+				</ol>
+			</nav>
+		}
+		<article
+			class="prose"
+			if v.Page.NeedsAnchors() {
+				data-anchors
+			}
+		>
+			@templ.Raw(string(v.Page.Body))
+		</article>
+	}
+}
+
+// Section renders a parent section's own page: the tab bar plus its intro.
+templ SectionPage(v View) {
+	@Layout(v) {
+		@PageTitle(v.Section.Title, v.Description)
+		@tabs(v)
+		if v.Page.Title != "" {
+			<article class="prose">
+				@templ.Raw(string(v.Page.Body))
+			</article>
+		}
+	}
+}
+
+templ NotFound(v View) {
+	@Layout(v) {
+		@PageTitle("404", "")
+		<article class="prose">
+			<p>That page has no preimage. Nothing lives at this address.</p>
+			<p>
+				<a href="/">
+					Back home
+					@ArrowRight()
+				</a>
+			</p>
+		</article>
+	}
+}
