@@ -2,22 +2,25 @@ package ui
 
 import "fmt"
 
-// Article is the generic page template, used by Blog posts, Projects entries
-// and every Code and Not Code sub-page. Furniture appears by length rather
-// than by section, so short pages stay clean and long ones stay navigable.
+// Article is the generic page template: Blog posts, Projects entries, and
+// every Code and Not Code sub-page. Furniture appears by length rather than
+// by section.
 templ Article(v View) {
 	@Layout(v) {
 		@PageTitle(v.Page.Title, v.Page.Standfirst)
 		@tabs(v)
 		if v.Page.Rail() != "" || v.Page.WordCount > 400 {
-			<div class="meta-rule">
-				<span>{ v.Page.Rail() }</span>
-				if v.Page.WordCount > 400 {
-					<span>{ fmt.Sprintf("%d min read", v.Page.ReadingMinutes()) }</span>
+			<p class="article-meta">
+				if v.Page.Rail() != "" {
+					{ v.Page.Rail() }
 				}
-			</div>
-		} else {
-			<hr class="plain-rule"/>
+				if v.Page.Rail() != "" && v.Page.WordCount > 400 {
+					{ " · " }
+				}
+				if v.Page.WordCount > 400 {
+					{ fmt.Sprintf("%d min read", v.Page.ReadingMinutes()) }
+				}
+			</p>
 		}
 		if v.Page.NeedsTOC() {
 			<nav class="toc" aria-label="Contents">
@@ -42,7 +45,7 @@ templ Article(v View) {
 	}
 }
 
-// Section renders a parent section's own page: the tab bar plus its intro.
+// SectionPage is a parent section's own page: tab bar plus its intro.
 templ SectionPage(v View) {
 	@Layout(v) {
 		@PageTitle(v.Section.Title, v.Lede)
@@ -57,15 +60,10 @@ templ SectionPage(v View) {
 
 templ NotFound(v View) {
 	@Layout(v) {
-		@PageTitle("404", "")
-		<article class="prose">
-			<p>That page has no preimage. Nothing lives at this address.</p>
-			<p>
-				<a href="/">
-					Back home
-					@ArrowRight()
-				</a>
-			</p>
-		</article>
+		@PageTitle("404", "That page has no preimage.")
+		<div class="prose">
+			<p>Nothing lives at this address.</p>
+			<p><a href="/">Back home</a></p>
+		</div>
 	}
 }

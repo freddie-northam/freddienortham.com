@@ -1,43 +1,38 @@
 @import "tailwindcss";
 
 /* Tailwind must scan .templ sources, not the generated _templ.go files: class
-   names only exist in the former. This is the single most common way a templ
-   plus Tailwind build silently loses styles. */
+   names only exist in the former. */
 @source "../internal/ui/**/*.templ";
 
 /* Declared on :root rather than in @theme. Tailwind v4 tree-shakes theme
    variables that no generated utility references, and every token here is
-   consumed by hand-written CSS below, so @theme would emit none of them and
-   the whole design system would silently resolve to nothing. */
+   consumed by hand-written CSS, so @theme would emit none of them. */
 :root {
-  --color-paper: #ffffff;
-  --color-ink: #0a0a0a;
-  --color-grey-700: #4a4a4a;
-  --color-grey-500: #8a8a8a;
-  --color-grey-300: #c4c4c4;
-  --color-grey-100: #ededed;
+  --page: #ffffff;
+  --ink: #0a0a0a;
+  --muted: #5f5f5f;
+  --faint: #8a8a8a;
+  --rule: #e8e8e8;
+
+  --accent: #0a0a0a;
 
   --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
 
-  --accent: #0a0a0a;
-  --measure: 900px;
-  --gutter: 72px;
+  /* One narrow column, measured off the reference. Nothing on the site is
+     wider than this. */
+  --measure: 576px;
 
-  /* The type scale. Every font-size on the site must reference one of these:
-     nothing else is allowed a raw px value. `make check` greps for violations,
-     because a design system drifts one hardcoded 14px at a time. */
-  --fs-mono: 12px;   /* all monospace metadata, rails, colophon, labels */
-  --fs-ui: 15px;     /* nav, tabs, standfirst, row subtitles, footer */
-  --fs-body: 17px;   /* prose */
-  --fs-title: 19px;  /* list row titles, h3 */
-  --fs-h2: 24px;
-  --fs-display: 76px;    /* page titles; the home wordmark is fluid */
-  --fs-display-sm: 44px; /* the same, below 768px */
+  /* The type scale. Nothing here is display type: the largest thing on the
+     site is 24px. Every font-size references one of these, and `make scale`
+     fails the build on a raw px value. */
+  --fs-mono: 13px;
+  --fs-sm: 14px;
+  --fs-body: 16px;
+  --fs-h2: 20px;
+  --fs-h1: 24px;
 
-  --lh-tight: 1.3;
-  --lh-body: 1.65;
-  --lh-ui: 1.5;
+  --lh-body: 1.5;
 }
 
 @font-face {
@@ -53,16 +48,13 @@
   font-display: swap;
 }
 
-/* ---------- base ---------- */
-
 html {
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
 body {
-  background: var(--color-paper);
-  color: var(--color-ink);
+  background: var(--page);
+  color: var(--ink);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
   line-height: var(--lh-body);
@@ -71,7 +63,7 @@ body {
 .shell {
   max-width: var(--measure);
   margin: 0 auto;
-  padding: 72px var(--gutter) 120px;
+  padding: 48px 24px 80px;
 }
 
 a {
@@ -86,293 +78,167 @@ a {
 .skip:focus {
   left: 16px;
   top: 16px;
-  background: var(--color-ink);
-  color: var(--color-paper);
+  background: var(--ink);
+  color: var(--page);
   padding: 8px 12px;
   z-index: 10;
 }
-
 :focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 3px;
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
 }
 
 .icon {
   display: inline-block;
   vertical-align: -2px;
-  margin-left: 4px;
+  flex: 0 0 auto;
+  color: var(--faint);
 }
 
-/* ---------- nav and tabs ---------- */
-
-.nav,
-.tabs {
-  display: flex;
-  gap: 10px 22px;
-  font-size: var(--fs-ui);
-  flex-wrap: wrap;
-}
+/* ---------- nav ---------- */
 
 .nav {
-  margin-bottom: 72px;
-  color: var(--color-grey-500);
+  display: flex;
+  gap: 16px;
+  margin-bottom: 40px;
+  flex-wrap: wrap;
+}
+.nav a {
+  color: var(--muted);
 }
 .nav a:hover {
-  color: var(--color-ink);
+  color: var(--ink);
 }
-/* The active item keeps ink-coloured text and carries the accent only on the
-   underline: a 2px border is non-text, so 3:1 suffices there, while accent on
-   the label itself would need 4.5:1. */
-.nav .on,
-.tabs .on {
-  color: var(--color-ink);
-  border-bottom: 2px solid var(--accent);
-  padding-bottom: 2px;
+.nav a.on {
+  color: var(--ink);
 }
 
-.tabs {
-  margin: -8px 0 44px;
-  color: var(--color-grey-500);
-}
-.tabs a:hover {
-  color: var(--color-ink);
+/* ---------- headings ---------- */
+
+h1 {
+  font-size: var(--fs-h1);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  margin-bottom: 20px;
 }
 
-/* ---------- display titles ---------- */
-
-.page-head {
-  margin-bottom: 40px;
+.section {
+  margin-top: 44px;
+}
+.section h2 {
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  margin-bottom: 12px;
 }
 
-/* Four ghost layers as text-shadows on one element. No duplicate DOM, so no
-   phantom find-in-page matches and no polluted text selection. */
-.echo {
-  font-size: var(--fs-display);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 0.85;
-  padding-top: 52px;
-  text-shadow:
-    0 0 0 transparent,
-    0 0 0 transparent,
-    0 0 0 transparent,
-    0 0 0 transparent;
-  transition: text-shadow 420ms cubic-bezier(0.22, 1, 0.36, 1);
+.lede {
+  color: var(--muted);
+  margin-bottom: 24px;
 }
 
-.echo.is-in {
-  text-shadow:
-    0 -12px 0 var(--color-grey-300),
-    0 -24px 0 #d6d6d6,
-    0 -36px 0 #e4e4e4,
-    0 -48px 0 var(--color-grey-100);
-}
+/* ---------- rows ---------- */
 
-.standfirst {
-  font-size: var(--fs-ui);
-  color: var(--color-grey-500);
-  margin-top: 14px;
-  max-width: 52ch;
-}
-
-/* Homepage wordmark: the weight wave. Advance widths are stable because Geist
-   varies on weight only, so the word never reflows as it animates. */
-.wordmark {
-  font-size: clamp(44px, 10.4vw, 94px);
-  line-height: 0.92;
-  letter-spacing: -0.05em;
-  font-weight: 800;
-  margin-bottom: 48px;
-}
-.wordmark .word {
-  display: inline-block;
-  white-space: nowrap;
-}
-.wordmark .word + .word {
-  margin-left: 0.24em;
-}
-.wordmark .ltr {
-  display: inline-block;
-  font-variation-settings: "wght" 800;
-  will-change: font-variation-settings;
-}
-
-/* ---------- rules and lists ---------- */
-
-.meta-rule {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  border-top: 1px solid var(--color-ink);
-  padding-top: 10px;
-  margin-bottom: 8px;
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-grey-500);
-}
-.meta-rule .more {
-  color: var(--color-grey-500);
-}
-.meta-rule .more:hover {
-  color: var(--accent);
-}
-
-.list {
+.rows {
   list-style: none;
 }
-
 .row {
-  border-bottom: 1px solid var(--color-grey-100);
+  padding: 10px 0;
 }
 .row > a,
 .row > div {
   display: flex;
   align-items: flex-start;
-  gap: 20px;
-  padding: 18px 0;
-  position: relative;
+  gap: 14px;
 }
-
-/* The blueprint showing through, on demand only. */
-.row > a::before {
-  content: "";
-  position: absolute;
-  inset: 0 -12px;
-  background-image: repeating-linear-gradient(
-    to right,
-    var(--color-grey-100) 0 1px,
-    transparent 1px 24px
-  );
-  opacity: 0;
-  transition: opacity 180ms ease;
-  pointer-events: none;
-}
-.row > a:hover::before {
-  opacity: 0.5;
-}
-
-.row-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  min-width: 0;
-}
-.row-title {
-  font-size: var(--fs-title);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  line-height: 1.4;
-}
-.row > a:hover .row-title {
-  color: var(--accent);
-}
-.row-sub {
-  font-size: var(--fs-ui);
-  color: var(--color-grey-500);
-}
-.row-rail {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--color-grey-500);
-  white-space: nowrap;
-  padding-top: 4px;
-}
-.row .org {
-  color: var(--color-grey-500);
-  font-weight: 400;
-  margin-left: 8px;
-}
-
-.thumb {
-  flex: 0 0 132px;
-  aspect-ratio: 16 / 9;
+.row-thumb {
+  flex: 0 0 auto;
+  width: 88px;
+  height: 50px;
+  border-radius: 4px;
   overflow: hidden;
-  border-radius: 3px;
-  background: var(--color-grey-100);
+  background: #f0f0f0;
 }
-.thumb img {
+.row-thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
-/* Generated fallback so a project with no screenshot reads as deliberate. */
-.thumb-fallback {
-  background: var(--color-grey-100);
-  position: relative;
+.row-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
-.thumb-fallback::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 22px;
-  height: 22px;
-  transform: translate(-50%, -50%);
-  background: var(--accent);
-  clip-path: polygon(0 0, 100% 0, 100% 62%, 62% 100%, 0 100%);
-  opacity: 0.85;
+.row-title {
+  font-weight: 500;
+  letter-spacing: -0.008em;
+}
+.row a:hover .row-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.row-org {
+  color: var(--muted);
+  font-size: var(--fs-body);
+}
+.row-sub {
+  color: var(--muted);
+}
+.row-meta {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  white-space: nowrap;
+  flex: 0 0 auto;
+  padding-top: 2px;
+}
+.row-go {
+  flex: 0 0 auto;
+  padding-top: 3px;
+}
+
+.more {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--muted);
+  margin-top: 12px;
+}
+.more:hover {
+  color: var(--ink);
 }
 
 .empty {
-  color: var(--color-grey-500);
-  font-size: var(--fs-ui);
-  padding: 20px 0;
-}
-
-.home-block {
-  margin-top: 72px;
-}
-
-.intro {
-  margin-bottom: 72px;
-  max-width: 54ch;
+  color: var(--faint);
+  padding: 6px 0;
 }
 
 /* ---------- prose ---------- */
 
 .prose > * + * {
-  margin-top: 28px;
+  margin-top: 20px;
 }
 .prose h2 {
   font-size: var(--fs-h2);
   font-weight: 500;
-  letter-spacing: -0.02em;
-  line-height: var(--lh-tight);
-  margin-top: 48px;
+  margin-top: 32px;
 }
 .prose h3 {
-  font-size: var(--fs-title);
-  font-weight: 500;
-  margin-top: 36px;
-}
-.prose p {
-  max-width: 62ch;
-}
-.prose h2,
-.prose h3,
-.prose blockquote {
-  max-width: 62ch;
+  font-size: var(--fs-body);
+  font-weight: 600;
+  margin-top: 24px;
 }
 .prose a {
   text-decoration: underline;
   text-underline-offset: 3px;
-  text-decoration-color: var(--color-grey-300);
+  text-decoration-color: var(--rule);
 }
 .prose a:hover {
-  color: var(--accent);
-  text-decoration-color: var(--accent);
+  text-decoration-color: var(--ink);
 }
 .prose ul,
 .prose ol {
   padding-left: 20px;
-  max-width: 62ch;
-}
-.prose li + li {
-  margin-top: 8px;
 }
 .prose ul {
   list-style: disc;
@@ -380,25 +246,31 @@ a {
 .prose ol {
   list-style: decimal;
 }
+.prose li + li {
+  margin-top: 6px;
+}
+.prose li::marker {
+  color: var(--faint);
+}
 .prose blockquote {
-  border-left: 2px solid var(--color-grey-300);
-  padding-left: 20px;
-  color: var(--color-grey-700);
+  border-left: 2px solid var(--rule);
+  padding-left: 16px;
+  color: var(--muted);
 }
 .prose code {
   font-family: var(--font-mono);
   font-size: 0.88em;
-  background: var(--color-grey-100);
+  background: #f4f4f4;
   padding: 2px 5px;
   border-radius: 3px;
 }
 .prose pre {
-  background: var(--color-grey-100);
-  padding: 20px;
-  border-radius: 4px;
+  background: #f8f8f8;
+  border: 1px solid var(--rule);
+  padding: 16px;
+  border-radius: 6px;
   overflow-x: auto;
   font-size: var(--fs-mono);
-  line-height: var(--lh-ui);
 }
 .prose pre code {
   background: none;
@@ -411,14 +283,19 @@ a {
 }
 .prose hr {
   border: 0;
-  border-top: 1px solid var(--color-grey-100);
+  border-top: 1px solid var(--rule);
+}
+
+.article-meta {
+  color: var(--faint);
+  font-size: var(--fs-sm);
+  margin-bottom: 24px;
 }
 
 .anchor {
   opacity: 0;
-  margin-left: 8px;
-  color: var(--color-grey-300);
-  transition: opacity 140ms ease;
+  margin-left: 6px;
+  color: var(--faint);
 }
 h2:hover .anchor,
 h3:hover .anchor,
@@ -427,44 +304,133 @@ h3:hover .anchor,
 }
 
 .toc {
-  border-left: 2px solid var(--color-grey-100);
-  padding-left: 20px;
-  margin: 32px 0;
+  border-left: 2px solid var(--rule);
+  padding-left: 16px;
+  margin: 24px 0;
 }
 .toc-label {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--color-grey-500);
-  margin-bottom: 8px;
+  font-size: var(--fs-sm);
+  color: var(--faint);
+  margin-bottom: 6px;
 }
 .toc ol {
   list-style: none;
-  font-size: var(--fs-ui);
-}
-.toc a:hover {
-  color: var(--accent);
+  font-size: var(--fs-sm);
 }
 
-.copy-btn {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: var(--color-paper);
-  border: 1px solid var(--color-grey-100);
-  border-radius: 3px;
-  padding: 4px 6px;
-  color: var(--color-grey-500);
-  cursor: pointer;
-  opacity: 0;
-  transition: opacity 140ms ease;
-}
 .pre-wrap {
   position: relative;
 }
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--page);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 4px 6px;
+  color: var(--faint);
+  cursor: pointer;
+  opacity: 0;
+}
 .pre-wrap:hover .copy-btn {
   opacity: 1;
+}
+
+/* ---------- tabs ---------- */
+
+.tabs {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+  font-size: var(--fs-sm);
+}
+.tabs a {
+  color: var(--muted);
+}
+.tabs a:hover {
+  color: var(--ink);
+}
+.tabs a.on {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+/* ---------- bookshelf ---------- */
+
+/* Spines are typographic rather than scanned covers: publisher artwork would
+   be the only colour on the page, and the section would depend on chasing
+   down images. A cover can still be supplied per book. */
+.shelf {
+  overflow-x: auto;
+  padding-top: 4px;
+  margin: 8px 0 4px;
+}
+.shelf-books {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  min-height: 148px;
+}
+.spine {
+  flex: 0 0 auto;
+  width: 32px;
+  height: 132px;
+  border: 1px solid var(--rule);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px 0;
+  transform-origin: bottom center;
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 200ms ease;
+}
+.spine:hover {
+  transform: translateY(-8px);
+  border-color: var(--ink);
+}
+.spine:nth-child(3n) {
+  height: 142px;
+  width: 37px;
+}
+.spine:nth-child(4n) {
+  height: 124px;
+}
+.spine-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 100%;
+}
+.spine-title {
+  font-size: var(--fs-sm);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 0;
+}
+.spine-author {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--faint);
+  flex: 0 0 auto;
+}
+.spine-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shelf-board {
+  height: 3px;
+  background: var(--ink);
+  min-width: 100%;
 }
 
 /* ---------- component gallery ---------- */
@@ -472,257 +438,74 @@ h3:hover .anchor,
 .gallery {
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 .specimen {
-  border-bottom: 1px solid var(--color-grey-100);
-  padding: 24px 0;
-}
-.specimen-head {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--rule);
   display: flex;
+  align-items: center;
   gap: 16px;
-  align-items: baseline;
-  margin-bottom: 16px;
+}
+.specimen-render {
+  flex: 0 0 auto;
+  width: 44px;
+  display: grid;
+  place-items: center;
 }
 .specimen-name {
   font-family: var(--font-mono);
-  font-size: var(--fs-mono);
+  font-size: var(--fs-sm);
+  flex: 0 0 auto;
+  min-width: 118px;
 }
 .specimen-note {
-  font-size: var(--fs-ui);
-  color: var(--color-grey-500);
-}
-.specimen-render {
-  padding: 20px;
-  background: var(--color-grey-100);
-  border-radius: 4px;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-.specimen-scale {
-  transform: scale(0.42);
-  transform-origin: left top;
-  /* The echo ghosts sit 48px above the baseline inside the element's padding.
-     At 0.42 scale the box still needs room for all of it, or the container
-     clips the very thing this specimen exists to demonstrate. */
-  height: 108px;
-}
-.specimen-code {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--color-grey-700);
+  color: var(--muted);
+  font-size: var(--fs-sm);
 }
 .install {
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
-  color: var(--color-grey-700);
-  background: var(--color-grey-100);
-  padding: 2px 6px;
-  border-radius: 3px;
-  align-self: flex-start;
-  margin-top: 4px;
+  color: var(--muted);
 }
 
 /* ---------- footer ---------- */
 
 .footer {
-  margin-top: 96px;
-  padding-top: 20px;
-  border-top: 1px solid var(--color-grey-100);
-}
-.footer-links {
+  margin-top: 56px;
   display: flex;
-  gap: 20px;
-  font-size: var(--fs-ui);
-  color: var(--color-grey-500);
+  gap: 18px;
   flex-wrap: wrap;
+  align-items: center;
+  color: var(--muted);
+  font-size: var(--fs-sm);
 }
-.footer-links a:hover {
-  color: var(--accent);
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.footer a:hover {
+  color: var(--ink);
 }
 .colophon {
-  margin-top: 28px;
+  margin-top: 20px;
   font-family: var(--font-mono);
   font-size: var(--fs-mono);
-  letter-spacing: 0.06em;
-  color: var(--color-grey-500);
+  color: var(--faint);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 .days {
   font-variant-numeric: tabular-nums;
 }
-
-/* ---------- responsive ---------- */
-
-@media (max-width: 768px) {
-  :root {
-    --gutter: 24px;
-  }
-  .shell {
-    padding-top: 32px;
-  }
-
-  .echo {
-    font-size: var(--fs-display-sm);
-    padding-top: 34px;
-  }
-  .echo.is-in {
-    text-shadow:
-      0 -8px 0 var(--color-grey-300),
-      0 -16px 0 #d6d6d6,
-      0 -24px 0 #e4e4e4,
-      0 -32px 0 var(--color-grey-100);
-  }
-  /* Thumb, body and rail in one flex row leaves the title about 160px on a
-     390px screen, which wraps every heading to four lines. Drop the rail to
-     its own full-width line instead. */
-  .row > a,
-  .row > div {
-    gap: 14px;
-    flex-wrap: wrap;
-  }
-  .thumb {
-    flex-basis: 72px;
-  }
-  .row-body {
-    flex: 1 1 60%;
-  }
-  .row-rail {
-    order: 3;
-    flex: 1 1 100%;
-    padding-top: 6px;
-  }
-  .nav {
-    margin-bottom: 48px;
-  }
-}
-
-/* ---------- reduced motion ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
   *::after {
     transition-duration: 0.01ms !important;
-    animation-duration: 0.01ms !important;
   }
-  .echo {
-    text-shadow:
-      0 -12px 0 var(--color-grey-300),
-      0 -24px 0 #d6d6d6,
-      0 -36px 0 #e4e4e4,
-      0 -48px 0 var(--color-grey-100);
-  }
-  .row > a::before {
-    display: none;
-  }
-}
-
-/* ---------- bookshelf ---------- */
-
-/* Books stand on a shelf. Spines are typographic, so the section needs no
-   cover images to look finished, and a real cover can be dropped in per book
-   when one is worth showing. */
-.shelf {
-  margin: 32px 0 8px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding-bottom: 4px;
-  scrollbar-width: thin;
-}
-
-.shelf-books {
-  display: flex;
-  align-items: flex-end;
-  gap: 7px;
-  padding: 0 2px;
-  min-height: 210px;
-}
-
-.spine {
-  flex: 0 0 auto;
-  width: 42px;
-  height: 190px;
-  background: var(--color-grey-100);
-  border: 1px solid var(--color-grey-300);
-  border-bottom: none;
-  border-radius: 2px 2px 0 0;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding: 10px 0;
-  transition:
-    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
-    background 220ms ease;
-  transform-origin: bottom center;
-}
-.spine:hover {
-  transform: translateY(-10px);
-  background: var(--color-paper);
-  border-color: var(--color-ink);
-}
-
-/* Every third spine sits marginally taller and wider, so the row reads as a
-   shelf of different books rather than a bar chart. */
-.spine:nth-child(3n) {
-  height: 205px;
-  width: 48px;
-}
-.spine:nth-child(4n) {
-  height: 178px;
-}
-.spine:nth-child(5n) {
-  width: 36px;
-}
-
-.spine-text {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  white-space: nowrap;
-  overflow: hidden;
-  max-height: 100%;
-}
-.spine-title {
-  font-size: var(--fs-ui);
-  font-weight: 500;
-  letter-spacing: -0.01em;
-  /* A long title must truncate rather than push the author off the spine. */
-  overflow: hidden;
-  text-overflow: ellipsis;
-  min-height: 0;
-}
-.spine-author {
-  flex: 0 0 auto;
-}
-.spine-author {
-  font-family: var(--font-mono);
-  font-size: var(--fs-mono);
-  color: var(--color-grey-500);
-}
-.spine-cover {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 1px;
-}
-
-.shelf-board {
-  height: 6px;
-  background: var(--color-ink);
-  border-radius: 1px;
-  min-width: 100%;
-}
-
-.shelf-note {
-  margin-top: 40px;
-}
-
-@media (prefers-reduced-motion: reduce) {
   .spine:hover {
     transform: none;
   }

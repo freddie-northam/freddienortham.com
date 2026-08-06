@@ -1,46 +1,42 @@
 package ui
 
+
 // Projects carries two blocks: roles held, then things built. Keeping them
 // apart stops a four-year co-founder role reading with the same weight as a
 // weekend build.
 templ Projects(v View) {
 	@Layout(v) {
 		@PageTitle(v.Section.Title, v.Lede)
-		<section class="home-block">
-			<div class="meta-rule">
-				<span>Work</span>
-				if !v.ShowAllWork {
-					<a class="more" href="/projects/all/">
-						view all
-						@ArrowRight()
-					</a>
-				} else {
-					<a class="more" href="/projects/">
-						back
-						@ArrowLeft()
-					</a>
-				}
-			</div>
-			<ul class="list" data-grid>
+		<section class="section">
+			<h2>Work</h2>
+			<ul class="rows">
 				for _, r := range v.Work {
 					@roleRow(r)
 				}
 			</ul>
+			if !v.ShowAllWork {
+				<a class="more" href="/projects/all/">
+					View all roles
+					@ArrowUpRight()
+				</a>
+			} else {
+				<a class="more" href="/projects/">
+					Back to projects
+					@ArrowUpRight()
+				</a>
+			}
 		</section>
 		if !v.ShowAllWork {
-			<section class="home-block">
-				<div class="meta-rule">
-					<span>Built</span>
-					<span>{ countLabel(len(v.Pages)) }</span>
-				</div>
-				if len(v.Pages) > 0 {
-					<ul class="list" data-grid>
+			<section class="section">
+				<h2>Built</h2>
+				if len(v.Pages) == 0 {
+					<p class="empty">Nothing published here yet.</p>
+				} else {
+					<ul class="rows">
 						for _, p := range v.Pages {
 							@Row(p)
 						}
 					</ul>
-				} else {
-					<p class="empty">Nothing here yet.</p>
 				}
 			</section>
 		}
@@ -48,27 +44,26 @@ templ Projects(v View) {
 }
 
 templ roleRow(r Role) {
-	<li class="row role">
+	<li class="row">
 		if r.URL != "" {
 			<a href={ templ.SafeURL(r.URL) } rel="noopener">
 				@roleBody(r)
-				<span class="row-rail">{ r.Period }</span>
+				<span class="row-go">
+					@ArrowUpRight()
+				</span>
 			</a>
 		} else {
 			<div>
 				@roleBody(r)
-				<span class="row-rail">{ r.Period }</span>
 			</div>
 		}
 	</li>
 }
 
 templ roleBody(r Role) {
-	<span class="row-body">
-		<span class="row-title">
-			{ r.Title }
-			<span class="org">{ r.Org }</span>
-		</span>
+	<span class="row-main">
+		<span class="row-title">{ r.Title }<span class="row-org"> &nbsp;{ r.Org }</span></span>
 		<span class="row-sub">{ r.Summary }</span>
 	</span>
+	<span class="row-meta">{ r.Period }</span>
 }

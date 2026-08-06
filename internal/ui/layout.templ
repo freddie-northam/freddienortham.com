@@ -30,7 +30,7 @@ templ Layout(v View) {
 			<link rel="stylesheet" href="/site.css"/>
 			<script src="/site.js" defer></script>
 		</head>
-		<body style={ fmt.Sprintf("--accent:%s", v.Accent) }>
+		<body>
 			<a class="skip" href="#main">Skip to content</a>
 			<div class="shell">
 				<nav class="nav" aria-label="Primary">
@@ -69,35 +69,33 @@ templ tabs(v View) {
 
 templ footer(v View) {
 	<footer class="footer">
-		<div class="footer-links">
-			<a href={ templ.SafeURL(v.Site.GitHub) } rel="me noopener">
-				github
+		<a href={ templ.SafeURL(v.Site.GitHub) } rel="me noopener">
+			@ArrowUpRight()
+			github
+		</a>
+		if v.Site.X != "TODO" {
+			<a href={ templ.SafeURL(v.Site.X) } rel="me noopener">
 				@ArrowUpRight()
+				x
 			</a>
-			if v.Site.X != "TODO" {
-				<a href={ templ.SafeURL(v.Site.X) } rel="me noopener">
-					x
-					@ArrowUpRight()
-				</a>
-			}
-			<a href={ templ.SafeURL(v.Site.LinkedIn) } rel="me noopener">
-				linkedin
+		}
+		<a href={ templ.SafeURL(v.Site.LinkedIn) } rel="me noopener">
+			@ArrowUpRight()
+			linkedin
+		</a>
+		if v.Site.Email != "TODO" {
+			<a href={ templ.SafeURL("mailto:" + v.Site.Email) }>
 				@ArrowUpRight()
+				email
 			</a>
-			if v.Site.Email != "TODO" {
-				<a href={ templ.SafeURL("mailto:" + v.Site.Email) }>
-					email
-					@ArrowUpRight()
-				</a>
-			}
-			<a href="/feed.xml">
-				rss
-				@Rss()
-			</a>
-		</div>
-		<p class="colophon">
-			<span data-days={ fmt.Sprint(v.DaysZero) } class="days">&nbsp;</span>
-			<span class="aphorism">{ v.Site.Colophon }</span>
-		</p>
+		}
+		<a href="/feed.xml">
+			@Rss()
+			rss
+		</a>
 	</footer>
+	<p class="colophon">
+		<span data-days={ fmt.Sprint(v.DaysZero) } class="days">&nbsp;</span>
+		<span>{ v.Site.Colophon }</span>
+	</p>
 }

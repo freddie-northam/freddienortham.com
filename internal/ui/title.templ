@@ -1,23 +1,37 @@
 package ui
 
-// EchoTitle is the display title. The four ghost copies are layered
-// text-shadows on this single element, not duplicate DOM nodes: duplicates
-// would make find-in-page report five phantom matches and text selection
-// yield the word repeated five times. As shadows they add no nodes and are
-// invisible to assistive technology by construction.
-//
-// The cost is that per-ghost stagger is impossible, since browsers interpolate
-// a shadow stack layer by layer. The stack rises as one, which reads nearly
-// identically at this size.
-templ EchoTitle(text string) {
-	<h1 class="echo" data-echo>{ text }</h1>
+import "github.com/freddie-northam/freddienortham.com/internal/content"
+
+// PageTitle is the page opener. Nothing on this site is display type: the
+// largest thing anywhere is 24px, so a page announces itself by saying what
+// it is rather than by shouting.
+templ PageTitle(title, lede string) {
+	<h1>{ title }</h1>
+	if lede != "" {
+		<p class="lede">{ lede }</p>
+	}
 }
 
-templ PageTitle(text, standfirst string) {
-	<header class="page-head">
-		@EchoTitle(text)
-		if standfirst != "" {
-			<p class="standfirst">{ standfirst }</p>
-		}
-	</header>
+// Row is one item in any list. A single row treatment across Blog, Projects
+// and Work is what stops three sections drifting into three list styles.
+templ Row(p content.Page) {
+	<li class="row">
+		<a href={ templ.SafeURL(p.URL()) }>
+			if p.Thumb != "" {
+				<span class="row-thumb"><img src={ p.Thumb } alt="" loading="lazy" decoding="async"/></span>
+			}
+			<span class="row-main">
+				<span class="row-title">{ p.Title }</span>
+				if p.Standfirst != "" {
+					<span class="row-sub">{ p.Standfirst }</span>
+				}
+			</span>
+			if p.Rail() != "" {
+				<span class="row-meta">{ p.Rail() }</span>
+			}
+			<span class="row-go">
+				@ArrowUpRight()
+			</span>
+		</a>
+	</li>
 }

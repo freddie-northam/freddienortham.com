@@ -5,25 +5,15 @@ import "github.com/freddie-northam/freddienortham.com/internal/content"
 // Shelf renders books standing on a shelf.
 //
 // Spines are typographic rather than scanned covers. On a monochrome site a
-// row of publisher artwork would be the only colour on the page and would
-// fight everything else, and it would make the section depend on chasing down
-// cover images. Set in Geist on a grey spine, it needs no assets at all and a
-// cover can still be supplied per book when one is worth showing.
+// row of publisher artwork would be the only colour on the page, and the
+// section would depend on chasing down images. A cover can still be supplied
+// per book when the artwork earns it.
 templ Shelf(v View) {
 	@Layout(v) {
 		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
-		if len(v.Page.Books) == 0 {
-			<p class="empty">
-				No books yet. Add a <code>books:</code> list to
-				<code>content/not-code/reading.md</code>.
-			</p>
-		} else {
-			<div class="meta-rule">
-				<span>{ countLabel(len(v.Page.Books)) }</span>
-				<span>Shelf</span>
-			</div>
-			<div class="shelf" role="list">
+		if len(v.Page.Books) > 0 {
+			<div class="shelf">
 				<div class="shelf-books">
 					for _, b := range v.Page.Books {
 						@spine(b)
@@ -33,7 +23,7 @@ templ Shelf(v View) {
 			</div>
 		}
 		if v.Page.WordCount > 0 {
-			<article class="prose shelf-note">
+			<article class="prose">
 				@templ.Raw(string(v.Page.Body))
 			</article>
 		}
@@ -41,7 +31,7 @@ templ Shelf(v View) {
 }
 
 templ spine(b content.Book) {
-	<div class="spine" role="listitem" title={ b.Title + " — " + b.Author }>
+	<div class="spine" title={ b.Title + " — " + b.Author }>
 		if b.Cover != "" {
 			<img class="spine-cover" src={ b.Cover } alt={ b.Title } loading="lazy" decoding="async"/>
 		} else {
