@@ -35,6 +35,17 @@ type Page struct {
 	Body       template.HTML
 	WordCount  int
 	Headings   []Heading
+	Books      []Book
+}
+
+// Book is one volume on the shelf. Covers are optional: without one the
+// spine is set typographically, which needs no image assets and suits a
+// monochrome site better than a wall of publisher artwork would.
+type Book struct {
+	Title  string `yaml:"title"`
+	Author string `yaml:"author"`
+	Cover  string `yaml:"cover"`
+	Note   string `yaml:"note"`
 }
 
 type Heading struct {
@@ -52,6 +63,7 @@ type matter struct {
 	Thumb      string   `yaml:"thumb"`
 	Aliases    []string `yaml:"aliases"`
 	Draft      bool     `yaml:"draft"`
+	Books      []Book   `yaml:"books"`
 }
 
 // URL is the canonical trailing-slash path.
@@ -260,6 +272,7 @@ func Parse(raw []byte, section, filename string) (Page, error) {
 		Body:       template.HTML(body),
 		WordCount:  len(strings.Fields(plain)),
 		Headings:   headings(raw),
+		Books:      fm.Books,
 	}, nil
 }
 

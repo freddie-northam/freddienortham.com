@@ -8,7 +8,7 @@ import "github.com/freddie-northam/freddienortham.com/internal/content"
 // here and not two.
 templ List(v View) {
 	@Layout(v) {
-		@PageTitle(v.Section.Title, v.Description)
+		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
 		if len(v.Pages) > 0 {
 			<div class="meta-rule">

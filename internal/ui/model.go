@@ -18,7 +18,8 @@ type Link struct {
 type View struct {
 	Site        content.Config
 	Title       string // <title>, without the site name
-	Description string
+	Description string // meta description only; may be a generated fallback
+	Lede        string // visible standfirst; only ever authored content
 	Path        string // canonical, trailing slash
 	Accent      string
 	Favicon     string

@@ -4,7 +4,7 @@ package ui
 // submodule so this page cannot drift from the source it documents.
 templ Skills(v View) {
 	@Layout(v) {
-		@PageTitle(v.Section.Title, v.Description)
+		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
 		if len(v.Skills) == 0 {
 			<p class="empty">
@@ -43,7 +43,7 @@ templ Skills(v View) {
 // the rest of the site uses, beside the source that produced it.
 templ Components(v View) {
 	@Layout(v) {
-		@PageTitle(v.Section.Title, v.Description)
+		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
 		<div class="meta-rule">
 			<span>{ countLabel(len(v.Components)) }</span>

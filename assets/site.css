@@ -21,8 +21,23 @@
   --font-mono: "Geist Mono", ui-monospace, SFMono-Regular, monospace;
 
   --accent: #0a0a0a;
-  --measure: 660px;
+  --measure: 900px;
   --gutter: 72px;
+
+  /* The type scale. Every font-size on the site must reference one of these:
+     nothing else is allowed a raw px value. `make check` greps for violations,
+     because a design system drifts one hardcoded 14px at a time. */
+  --fs-mono: 12px;   /* all monospace metadata, rails, colophon, labels */
+  --fs-ui: 15px;     /* nav, tabs, standfirst, row subtitles, footer */
+  --fs-body: 17px;   /* prose */
+  --fs-title: 19px;  /* list row titles, h3 */
+  --fs-h2: 24px;
+  --fs-display: 76px;    /* page titles; the home wordmark is fluid */
+  --fs-display-sm: 44px; /* the same, below 768px */
+
+  --lh-tight: 1.3;
+  --lh-body: 1.65;
+  --lh-ui: 1.5;
 }
 
 @font-face {
@@ -49,14 +64,14 @@ body {
   background: var(--color-paper);
   color: var(--color-ink);
   font-family: var(--font-sans);
-  font-size: 17px;
-  line-height: 1.65;
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
 }
 
 .shell {
   max-width: var(--measure);
   margin: 0 auto;
-  padding: 56px var(--gutter) 96px;
+  padding: 72px var(--gutter) 120px;
 }
 
 a {
@@ -93,8 +108,8 @@ a {
 .nav,
 .tabs {
   display: flex;
-  gap: 22px;
-  font-size: 15px;
+  gap: 10px 22px;
+  font-size: var(--fs-ui);
   flex-wrap: wrap;
 }
 
@@ -116,8 +131,7 @@ a {
 }
 
 .tabs {
-  margin: -16px 0 40px;
-  font-size: 14px;
+  margin: -8px 0 44px;
   color: var(--color-grey-500);
 }
 .tabs a:hover {
@@ -133,7 +147,7 @@ a {
 /* Four ghost layers as text-shadows on one element. No duplicate DOM, so no
    phantom find-in-page matches and no polluted text selection. */
 .echo {
-  font-size: 76px;
+  font-size: var(--fs-display);
   font-weight: 800;
   letter-spacing: -0.05em;
   line-height: 0.85;
@@ -155,7 +169,7 @@ a {
 }
 
 .standfirst {
-  font-size: 15px;
+  font-size: var(--fs-ui);
   color: var(--color-grey-500);
   margin-top: 14px;
   max-width: 52ch;
@@ -164,11 +178,11 @@ a {
 /* Homepage wordmark: the weight wave. Advance widths are stable because Geist
    varies on weight only, so the word never reflows as it animates. */
 .wordmark {
-  font-size: 96px;
-  line-height: 0.9;
+  font-size: clamp(44px, 10.4vw, 94px);
+  line-height: 0.92;
   letter-spacing: -0.05em;
   font-weight: 800;
-  margin-bottom: 40px;
+  margin-bottom: 48px;
 }
 .wordmark .word {
   display: inline-block;
@@ -194,7 +208,7 @@ a {
   padding-top: 10px;
   margin-bottom: 8px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-grey-500);
@@ -248,7 +262,7 @@ a {
   min-width: 0;
 }
 .row-title {
-  font-size: 19px;
+  font-size: var(--fs-title);
   font-weight: 500;
   letter-spacing: -0.01em;
   line-height: 1.4;
@@ -257,12 +271,12 @@ a {
   color: var(--accent);
 }
 .row-sub {
-  font-size: 15px;
+  font-size: var(--fs-ui);
   color: var(--color-grey-500);
 }
 .row-rail {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-mono);
   color: var(--color-grey-500);
   white-space: nowrap;
   padding-top: 4px;
@@ -305,16 +319,16 @@ a {
 
 .empty {
   color: var(--color-grey-500);
-  font-size: 15px;
+  font-size: var(--fs-ui);
   padding: 20px 0;
 }
 
 .home-block {
-  margin-top: 56px;
+  margin-top: 72px;
 }
 
 .intro {
-  margin-bottom: 56px;
+  margin-bottom: 72px;
   max-width: 54ch;
 }
 
@@ -324,18 +338,23 @@ a {
   margin-top: 28px;
 }
 .prose h2 {
-  font-size: 24px;
+  font-size: var(--fs-h2);
   font-weight: 500;
   letter-spacing: -0.02em;
-  line-height: 1.3;
+  line-height: var(--lh-tight);
   margin-top: 48px;
 }
 .prose h3 {
-  font-size: 19px;
+  font-size: var(--fs-title);
   font-weight: 500;
   margin-top: 36px;
 }
 .prose p {
+  max-width: 62ch;
+}
+.prose h2,
+.prose h3,
+.prose blockquote {
   max-width: 62ch;
 }
 .prose a {
@@ -378,7 +397,8 @@ a {
   padding: 20px;
   border-radius: 4px;
   overflow-x: auto;
-  font-size: 13px;
+  font-size: var(--fs-mono);
+  line-height: var(--lh-ui);
 }
 .prose pre code {
   background: none;
@@ -413,7 +433,7 @@ h3:hover .anchor,
 }
 .toc-label {
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-mono);
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--color-grey-500);
@@ -421,7 +441,7 @@ h3:hover .anchor,
 }
 .toc ol {
   list-style: none;
-  font-size: 15px;
+  font-size: var(--fs-ui);
 }
 .toc a:hover {
   color: var(--accent);
@@ -466,10 +486,10 @@ h3:hover .anchor,
 }
 .specimen-name {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-mono);
 }
 .specimen-note {
-  font-size: 14px;
+  font-size: var(--fs-ui);
   color: var(--color-grey-500);
 }
 .specimen-render {
@@ -489,12 +509,12 @@ h3:hover .anchor,
 }
 .specimen-code {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-mono);
   color: var(--color-grey-700);
 }
 .install {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--fs-mono);
   color: var(--color-grey-700);
   background: var(--color-grey-100);
   padding: 2px 6px;
@@ -513,7 +533,7 @@ h3:hover .anchor,
 .footer-links {
   display: flex;
   gap: 20px;
-  font-size: 15px;
+  font-size: var(--fs-ui);
   color: var(--color-grey-500);
   flex-wrap: wrap;
 }
@@ -523,7 +543,7 @@ h3:hover .anchor,
 .colophon {
   margin-top: 28px;
   font-family: var(--font-mono);
-  font-size: 11px;
+  font-size: var(--fs-mono);
   letter-spacing: 0.06em;
   color: var(--color-grey-500);
   display: flex;
@@ -543,11 +563,9 @@ h3:hover .anchor,
   .shell {
     padding-top: 32px;
   }
-  .wordmark {
-    font-size: 56px;
-  }
+
   .echo {
-    font-size: 44px;
+    font-size: var(--fs-display-sm);
     padding-top: 34px;
   }
   .echo.is-in {
@@ -599,5 +617,113 @@ h3:hover .anchor,
   }
   .row > a::before {
     display: none;
+  }
+}
+
+/* ---------- bookshelf ---------- */
+
+/* Books stand on a shelf. Spines are typographic, so the section needs no
+   cover images to look finished, and a real cover can be dropped in per book
+   when one is worth showing. */
+.shelf {
+  margin: 32px 0 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.shelf-books {
+  display: flex;
+  align-items: flex-end;
+  gap: 7px;
+  padding: 0 2px;
+  min-height: 210px;
+}
+
+.spine {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 190px;
+  background: var(--color-grey-100);
+  border: 1px solid var(--color-grey-300);
+  border-bottom: none;
+  border-radius: 2px 2px 0 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 10px 0;
+  transition:
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 220ms ease;
+  transform-origin: bottom center;
+}
+.spine:hover {
+  transform: translateY(-10px);
+  background: var(--color-paper);
+  border-color: var(--color-ink);
+}
+
+/* Every third spine sits marginally taller and wider, so the row reads as a
+   shelf of different books rather than a bar chart. */
+.spine:nth-child(3n) {
+  height: 205px;
+  width: 48px;
+}
+.spine:nth-child(4n) {
+  height: 178px;
+}
+.spine:nth-child(5n) {
+  width: 36px;
+}
+
+.spine-text {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  max-height: 100%;
+}
+.spine-title {
+  font-size: var(--fs-ui);
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  /* A long title must truncate rather than push the author off the spine. */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-height: 0;
+}
+.spine-author {
+  flex: 0 0 auto;
+}
+.spine-author {
+  font-family: var(--font-mono);
+  font-size: var(--fs-mono);
+  color: var(--color-grey-500);
+}
+.spine-cover {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 1px;
+}
+
+.shelf-board {
+  height: 6px;
+  background: var(--color-ink);
+  border-radius: 1px;
+  min-width: 100%;
+}
+
+.shelf-note {
+  margin-top: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spine:hover {
+    transform: none;
   }
 }

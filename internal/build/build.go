@@ -161,6 +161,7 @@ func (s *Site) section(sec content.Section) error {
 
 	idx, hasIdx := s.Index[sec.Slug]
 	v.Page = idx
+	v.Lede = idx.Standfirst
 	v.Description = idx.Standfirst
 	if v.Description == "" {
 		v.Description = fmt.Sprintf("%s — %s", sec.Title, content.Site.Name)
@@ -171,6 +172,10 @@ func (s *Site) section(sec content.Section) error {
 		switch sec.Template {
 		case "skills":
 			if err := s.write(sec.Path(), ui.Skills(v)); err != nil {
+				return err
+			}
+		case "shelf":
+			if err := s.write(sec.Path(), ui.Shelf(v)); err != nil {
 				return err
 			}
 		case "components":
@@ -231,7 +236,8 @@ func (s *Site) projectsAll() error {
 	v := s.base(sec, "projects")
 	v.Path = "/projects/all/"
 	v.Title = "Work"
-	v.Description = "Every role, in full."
+	v.Lede = "Every role, in full."
+	v.Description = v.Lede
 	v.Work = roles(content.Roles)
 	v.ShowAllWork = true
 	return s.write("/projects/all/", ui.Projects(v))

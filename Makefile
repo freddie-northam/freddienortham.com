@@ -14,7 +14,7 @@ build: tools
 
 # The link checker lives here rather than in `build` so a dead link fails the
 # deploy without blocking local preview while drafting.
-check: build
+check: build scale
 	go vet ./...
 	go test ./...
 	go run ./cmd/site -links-only -out dist
@@ -38,3 +38,10 @@ $(TAILWIND):
 
 clean:
 	rm -rf dist bin
+
+# Fitness function for the type scale. Every font-size must reference a token
+# in :root; a design system drifts one hardcoded 14px at a time.
+scale:
+	@if grep -nE '^\s*font-size:\s*[0-9]+px' assets/site.css; then \
+		echo "raw px font-size above: use a --fs-* token"; exit 1; \
+	else echo "type scale ok"; fi

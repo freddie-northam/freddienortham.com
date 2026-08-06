@@ -34,7 +34,7 @@ var Sections = []Section{
 	{Slug: "skills", Title: "Skills", Parent: "code", Template: "skills"},
 
 	// Not Code sub-pages.
-	{Slug: "reading", Title: "Reading", Parent: "not-code"},
+	{Slug: "reading", Title: "Reading", Parent: "not-code", Template: "shelf"},
 	{Slug: "music", Title: "Music", Parent: "not-code"},
 	{Slug: "podcasts", Title: "Podcasts", Parent: "not-code"},
 	{Slug: "sports", Title: "Sports", Parent: "not-code"},

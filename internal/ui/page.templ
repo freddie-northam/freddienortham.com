@@ -45,7 +45,7 @@ templ Article(v View) {
 // Section renders a parent section's own page: the tab bar plus its intro.
 templ SectionPage(v View) {
 	@Layout(v) {
-		@PageTitle(v.Section.Title, v.Description)
+		@PageTitle(v.Section.Title, v.Lede)
 		@tabs(v)
 		if v.Page.Title != "" {
 			<article class="prose">
